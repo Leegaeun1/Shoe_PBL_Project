@@ -24,9 +24,9 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 # ===== 사용자 설정 =====
-IMAGE_PATH   = "270L.jpg"            # 270 윤곽선 이미지 경로
-CSV_PATH     = "pred_series.csv" # 컨트롤 포인트 CSV 경로
-TARGET_SIZE  = 270                    # 사용할 사이즈(mm)
+IMAGE_PATH   = "250L.jpg"            # 270 윤곽선 이미지 경로
+CSV_PATH     = "pred_series_230_250_270.csv" # 컨트롤 포인트 CSV 경로
+TARGET_SIZE  = 250                  # 사용할 사이즈(mm) !!! 반드시 해줄것...
 THRESHOLD    = 40                     # 윤곽선 이진화 임계(0~255, 작을수록 검게 필터)
 SPL_SAMPLES  = 1500                   # 스플라인 샘플 개수
 TRIM_ENDS    = 10                     # 오픈 스플라인 끝단 트림 샘플 수(최대치 튀는 것 완화)
