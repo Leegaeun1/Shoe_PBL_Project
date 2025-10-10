@@ -14,49 +14,10 @@ import os, sys, csv
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.kernel_ridge import KernelRidge
-from sklearn.metrics import pairwise_distances
-
 
 DEGREE = 3
 SPLINE_SAMPLES = 400
 N_CTRL = None  # None이면 자동 통일
-
-
-
-
-def to_ctrl(v): return np.asarray(v, float).reshape(-1,2)
-
-def bbox_h(vec):
-    P = to_ctrl(vec)
-    return (P[:,1].max() - P[:,1].min())
-
-def median_height_ratio(X_rows, Y_rows):
-    # 행별 높이비의 중앙값
-    ratios = []
-    for x, y in zip(X_rows, Y_rows):
-        hx, hy = bbox_h(x), bbox_h(y)
-        if hx > 1e-9:
-            ratios.append(hy / hx)
-    if not ratios:
-        return 1.0
-    ratios = np.array(ratios, float)
-    return float(np.median(ratios))
-
-def median_heuristic_gamma(X):
-    D = pairwise_distances(X)
-    D = D[np.triu_indices_from(D, k=1)]
-    med = np.median(D[D > 0]) if np.any(D > 0) else 1.0
-    return 1.0 / (2.0 * (med**2 + 1e-12))
-
-def isotropic_rescale_about_centroid(base_vec, pred_vec, ratio):
-    """pred_vec을 base_vec의 중심을 기준으로 등비(ratio) 스케일."""
-    Pb = to_ctrl(base_vec)
-    Pp = to_ctrl(pred_vec)
-    c = Pb.mean(axis=0)
-    Pp2 = (Pp - c) * ratio + c
-    return Pp2.reshape(-1)
-
-
 
 # ----- B-spline -----
 def open_uniform_knot_vector(n_ctrl, degree):
@@ -92,33 +53,17 @@ def bspline_curve(ctrl, degree, knots, ts):
 
 # ----- 유틸 -----
 def read_matrix(path):
-    M = []
-    with open(path, "r", encoding="utf-8") as f:
+    M=[]
+    with open(path,"r",encoding="utf-8") as f:
         for ln in f:
-            s = ln.strip()
-            if not s or s.startswith("#"):
-                continue
-            toks = [t for t in s.replace(",", " ").split() if t]
-            try:
-                vals = [float(t) for t in toks]
-            except Exception:
-                continue
-
-            # 맨 앞 값이 mm 사이즈로 보이면 제거
-            if (len(vals) % 2 == 1) and (200.0 <= vals[0] <= 320.0):
-                vals = vals[1:]
-
-            # 여전히 홀수면 꼬리 값 1개 제거(로그 남김)
-            if len(vals) % 2 == 1:
-                print(f"[WARN] {os.path.basename(path)}: odd-length row -> dropping last value")
-                vals = vals[:-1]
-
-            if len(vals) >= 4:
-                M.append(np.array(vals, float))
-    if not M:
-        raise RuntimeError(f"no rows in {path}")
-    return M
-
+            ln=ln.strip()
+            if not ln or ln.startswith("#"): continue
+            toks=[t for t in ln.replace(",", " ").split() if t]
+            vals=list(map(float,toks))
+            if len(vals)<2: continue
+            M.append(np.array(vals,float))
+    if not M: raise RuntimeError(f"no rows in {path}")
+    return M  # list of 1D arrays (flattened)
 
 def arclen_resample(poly, n):
     P=poly.reshape(-1,2)
@@ -147,61 +92,16 @@ def unify_counts_list(list_of_flat, n_ctrl=None):
 
 def to_ctrl(v): return v.reshape(-1,2)
 
-def save_series_onefile(path, vec230, vec250, vec270, sep=","):
-    """
-    한 파일에 3행 저장:
-      230, x1,y1,x2,y2, ...
-      250, x1,y1,x2,y2, ...
-      270, x1,y1,x2,y2, ...
-    """
-    def make_row(size, vec):
-        return [str(int(size))] + [f"{v:.6f}" for v in np.asarray(vec).reshape(-1)]
-
-    # (선택) 헤더 넣고 싶으면 아래 3줄 주석 해제
-    # n = len(vec230)//2
-    # header = ["size"] + [f"x{i}" for i in range(1,n+1)] + [f"y{i}" for i in range(1,n+1)]
-    # writer.writerow(header)
-
-    with open(path, "w", encoding="utf-8", newline="") as f:
-        writer = csv.writer(f, delimiter=sep)
-        writer.writerow(make_row(230, vec230))
-        writer.writerow(make_row(250, vec250))
-        writer.writerow(make_row(270, vec270))
-    print(f"[OK] saved → {path} (rows: 230, 250, 270)")
-
-
 def plot_pair(ctrl230, ctrlT, title):
     fig, ax = plt.subplots(1,2, figsize=(8,4), constrained_layout=True)
-
-    # 곡선 먼저 둘 다 계산
-    K0 = open_uniform_knot_vector(len(ctrl230), DEGREE)
-    K1 = open_uniform_knot_vector(len(ctrlT),   DEGREE)
-    t  = np.linspace(0,1,SPLINE_SAMPLES,endpoint=False)
-    C0 = bspline_curve(ctrl230,DEGREE,K0,t)
-    C1 = bspline_curve(ctrlT,   DEGREE,K1,t)
-
-    # 공통 축 범위
-    all_xy = np.vstack([C0, C1, ctrl230, ctrlT])
-    xmin, ymin = all_xy.min(axis=0)
-    xmax, ymax = all_xy.max(axis=0)
-
-    # 왼쪽: 230
-    ax[0].plot(C0[:,0], C0[:,1], lw=2); ax[0].scatter(ctrl230[:,0], ctrl230[:,1], s=18)
-    ax[0].set_title("230 input")
-    # 오른쪽: target
-    ax[1].plot(C1[:,0], C1[:,1], lw=2); ax[1].scatter(ctrlT[:,0], ctrlT[:,1], s=18)
-    ax[1].set_title(title)
-
-    for k in (0,1):
-        ax[k].set_aspect("equal")
-        ax[k].set_xlim(xmin, xmax)
-        ax[k].set_ylim(ymax, ymin)  # 아래로 증가하는 이미지 좌표계이면 invert 대신 이렇게
-        ax[k].grid(True, alpha=0.3)
-        # ax[k].invert_yaxis() 를 쓰고 싶다면 위 set_ylim 대신:
-        #   ax[k].set_ylim(ymin, ymax); ax[k].invert_yaxis()
+    for k,(ctrl,name) in enumerate([(ctrl230,"230 input"), (ctrlT,title)]):
+        ax[k].set_aspect("equal","datalim"); ax[k].grid(True,alpha=0.3); ax[k].invert_yaxis()
+        K=open_uniform_knot_vector(len(ctrl), DEGREE)
+        t=np.linspace(0,1,SPLINE_SAMPLES,endpoint=False)
+        C=bspline_curve(ctrl,DEGREE,K,t)
+        ax[k].plot(C[:,0],C[:,1],lw=2); ax[k].scatter(ctrl[:,0],ctrl[:,1],s=18)
+        ax[k].set_title(name)
     plt.show()
-
-
 
 def main():
     # 학습 데이터 파일(각 5행 가정)
@@ -243,8 +143,11 @@ def main():
     pred270 = krr270.predict(new230[None,:])[0]
 
     # 저장
-    save_series_onefile("pred_series_230_250_270.csv", new230, pred250, pred270)
-
+    with open("pred_250.csv","w",encoding="utf-8",newline="") as f:
+        csv.writer(f).writerow([f"{v:.6f}" for v in pred250])
+    with open("pred_270.csv","w",encoding="utf-8",newline="") as f:
+        csv.writer(f).writerow([f"{v:.6f}" for v in pred270])
+    print("[OK] saved → pred_250.csv, pred_270.csv")
 
     # 시각화
     plot_pair(to_ctrl(new230), to_ctrl(pred250), "250 predicted")

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 
 # ========================= 사용자 설정 =========================
-CSV_PATH = os.path.abspath("pred_series_230_250_270.csv")   # 컨트롤 포인트 CSV 경로
+CSV_PATH = os.path.abspath("pred_series.csv")   # 컨트롤 포인트 CSV 경로
 EXPORT_DIR = os.path.dirname(CSV_PATH)               # 스플라인 샘플 내보내기 폴더
 SIZES = list(range(230, 305, 5))                     # 230,235,...,300
 DEGREE = 3                                           # B-스플라인 차수
