@@ -34,7 +34,7 @@ import os, re, csv
 import numpy as np
 
 # -------------------- 경로 설정 --------------------
-TRAIN_CSV = "control_points_master_20251010.csv" # 학습 데이터(230,240,...290)
+TRAIN_CSV = "control_points_master_20251013.csv" # 학습 데이터(230,240,...290)
 NEW230_CSV = "new_230.csv" # 새로운 230 데이터
 SAVE_PRED  = "pred_series.csv" # 저장되는 파일
 # --------------------------------------------------
