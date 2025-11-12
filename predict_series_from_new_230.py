@@ -156,8 +156,9 @@ def select_track(rows, P_new_resampled):
     L = len(P_new_resampled)
     rows_std = [(s, chordlen_resample(P, L)) for (s,P) in rows]
 
-    # 1) 230 후보 탐색
-    cand_230 = [(s,P) for (s,P) in rows_std if s == 230]
+    min_size = rows_std[0][0]
+    # 1) 230 후보 탐색 ->>> 제일 작은거 찾기 변경! 
+    cand_230 = [(s,P) for (s,P) in rows_std if s == min_size]
     if not cand_230:
         raise RuntimeError("No size 230 row in training data.")
     # new_230와 가장 가까운 230 찾기
@@ -243,7 +244,7 @@ def main():
 
     # 5) new_230의 접선/법선 기반 합성
     Tn, Nn = tangents_normals(P_new)
-    sizes_target = np.arange(235, 295, 5, dtype=int)  # 235..290
+    sizes_target = np.arange(230, 295, 5, dtype=int)  # 235..290
 
     dt_pred = interp_piecewise(sizes_train, Ydt, sizes_target.astype(float))
     dn_pred = interp_piecewise(sizes_train, Ydn, sizes_target.astype(float))

@@ -8,6 +8,8 @@
 ※ 스케일(픽셀→mm)은 이미지 파일 이름에서 실제 사이즈를 읽어와 자동 산출합니다.
 """
 
+'''윤곽선 사진이랑 컨트롤포인트 하면 비교해줌'''
+
 import os
 import re  #파일 이름 파싱을 위해 re 모듈을 가져옵니다.
 import numpy as np
@@ -15,9 +17,9 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 # ===== 사용자 설정 =====
-IMAGE_PATH = "270L.jpg"          # 분석할 윤곽선 이미지 경로
-CSV_PATH = "mapped_230_250_270.csv"     # 컨트롤 포인트 CSV 경로
-TARGET_SIZE = 270                # CSV에서 사용할 사이즈(mm)
+IMAGE_PATH = "240L.jpg"          # 분석할 윤곽선 이미지 경로
+CSV_PATH = "pred_series_krr.csv"     # 컨트롤 포인트 CSV 경로
+TARGET_SIZE = 240                # CSV에서 사용할 사이즈(mm)
 THRESHOLD = 40                   # 윤곽선 이진화 임계(0~255, 작을수록 검게 필터)
 SPL_SAMPLES = 1500               # 스플라인 샘플 개수
 TRIM_ENDS = 10                   # 오픈 스플라인 끝단 트림 샘플 수(최대치 튀는 것 완화)
@@ -140,8 +142,16 @@ def main():
     rows = parse_rows(CSV_PATH)
     size, ctrl = pick_ctrl_for_size(rows, TARGET_SIZE)
 
+    # ****************** [핵심 수정: 제어점 복사로 곡선 닫기] ******************
+    degree = 3 # bspline_curve의 기본 degree (degree=3 사용 가정)
+    
+    # 닫힌 곡선을 만들기 위해 시작점 3개를 끝에 복사하여 추가
+    ctrl_closed = np.concatenate([ctrl, ctrl[:degree]], axis=0) 
+    
     # 스플라인(mm) 생성
-    curve_mm = bspline_curve(ctrl, degree=3, samples=SPL_SAMPLES)
+    # curve_mm = bspline_curve(ctrl, degree=3, samples=SPL_SAMPLES)
+    curve_mm = bspline_curve(ctrl_closed, degree=degree, samples=SPL_SAMPLES)
+    # ********************************************************************************
     
     # 이미지에서 윤곽선 픽셀 추출
     outline = extract_outline_points(IMAGE_PATH, threshold=THRESHOLD)
@@ -167,7 +177,7 @@ def main():
     # 거리 계산: 스플라인 각 샘플 → 최근접 윤곽선
     d_curve_to_outline = nearest_distances(curve_mm_shift, outline_mm, chunk=2000)
 
-    # 끝단 트림
+    # 끝단 트림 (TRIM_ENDS가 적용됨)
     d_trim = d_curve_to_outline
     if TRIM_ENDS > 0 and TRIM_ENDS*2 < len(d_curve_to_outline):
         d_trim = d_curve_to_outline[TRIM_ENDS:-TRIM_ENDS]
@@ -195,7 +205,14 @@ def main():
     # 오버레이 이미지 생성 및 저장
     plt.figure(figsize=(5,9))
     plt.scatter(outline_mm[:,0], outline_mm[:,1], s=1, label="Outline (from Image)", color='red', alpha=0.8)
-    plt.plot(curve_mm_shift[:,0], curve_mm_shift[:,1], lw=2, label="B-spline (from CSV)", color='blue')
+    # ****************** [핵심 수정: 시각화 시 B-spline 끝단 트림 적용] ******************
+    curve_to_plot = curve_mm_shift
+    if TRIM_ENDS > 0 and TRIM_ENDS*2 < len(curve_mm_shift):
+        # TRIM_ENDS만큼 앞뒤 샘플을 제외하고 그립니다. (불안정한 시작/끝점 제거)
+        curve_to_plot = curve_mm_shift[TRIM_ENDS:-TRIM_ENDS]
+
+    plt.plot(curve_to_plot[:,0], curve_to_plot[:,1], lw=2, label="B-spline (from CSV)", color='blue')
+    # ********************************************************************************
     plt.gca().invert_yaxis()
     plt.gca().set_aspect("equal", "box")
     plt.title(f"Outline vs B-spline ({size}mm)")

@@ -576,7 +576,7 @@ if __name__ == "__main__":
     DEGREE = 3
     PICK_RADIUS_PX = 12
 
-    DIR_PATH = "./Fila - Pronto v2"  # <- 여기에 대상 디렉토리 경로 입력
+    DIR_PATH = "./Lecaf Airstep"  # <- 여기에 대상 디렉토리 경로 입력
     
     IMAGE_FILE = "260LB.jpg"
     N_CONTOUR_POINTS = 200
