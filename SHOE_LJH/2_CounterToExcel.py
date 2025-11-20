@@ -20,7 +20,7 @@ Dir_Name = "L"
 currentTime = datetime.now().strftime("%Y%m%d")
 
 
-OUTPUT_DIR = "Fin_Excel_Data" 
+OUTPUT_DIR = "20251120/CTRL40" 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
@@ -613,10 +613,10 @@ if __name__ == "__main__":
 
 
     
-    DIR_PATH = r"C:\Users\ljhyu\OneDrive\Desktop\Shoe_Project\output_outlines_1030\L"  # <- 여기에 대상 디렉토리 경로 입력
+    DIR_PATH = r"C:\Users\user\Documents\GitHub\Shoe_PBL_Project\SHOE_LJH\output_outlines_1030\L"  # <- 여기에 대상 디렉토리 경로 입력
     
 
-    IMAGE_FILE = "260LB.jpg"
+    #IMAGE_FILE = "260LB.jpg"
     N_CONTOUR_POINTS = 200
     N_CTRL_POINTS = 40
 

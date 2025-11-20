@@ -17,7 +17,7 @@ import numpy as np
 
 # -------------------- 경로 설정 --------------------
 # [MODIFIED] Use the uploaded file name
-Data_DIR = "control_points_master_test_Q" 
+Data_DIR = "Fin_Excel_Data1" 
 
 TRAIN_CSV =os.path.join(
     Data_DIR,

@@ -1,0 +1,9 @@
+Type,Base_Size,Points_Count,Time_sec,Inferred_Base_Type,Output_File
+Type00,240,20,0.006705499952659011,Type05,Fin_Excel_Data_CTRL20\pred_Data_230_280_PCA_Type00.csv
+Type01,230,20,0.007266499917022884,Type06,Fin_Excel_Data_CTRL20\pred_Data_230_280_PCA_Type01.csv
+Type02,230,20,0.007490199990570545,Type04,Fin_Excel_Data_CTRL20\pred_Data_230_280_PCA_Type02.csv
+Type03,230,20,0.006853200029581785,Type06,Fin_Excel_Data_CTRL20\pred_Data_230_280_PCA_Type03.csv
+Type04,230,20,0.0075647999765351415,Type03,Fin_Excel_Data_CTRL20\pred_Data_230_280_PCA_Type04.csv
+Type05,240,20,0.006162400008179247,Type02,Fin_Excel_Data_CTRL20\pred_Data_230_280_PCA_Type05.csv
+Type06,230,20,0.010761699988506734,Type03,Fin_Excel_Data_CTRL20\pred_Data_230_280_PCA_Type06.csv
+Type07,250,20,0.006965300068259239,Type00,Fin_Excel_Data_CTRL20\pred_Data_230_280_PCA_Type07.csv

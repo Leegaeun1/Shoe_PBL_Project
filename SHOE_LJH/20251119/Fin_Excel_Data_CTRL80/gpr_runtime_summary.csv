@@ -1,0 +1,9 @@
+Type,Base_Size,Points_Count,Time_sec,Inferred_Base_Type,Output_File
+Type00,240,80,2.615548999980092,Type05,Fin_Excel_Data_CTRL80\GPR/pred_Data_230_280_GPR_Type00.csv
+Type01,230,80,2.07978369994089,Type03,Fin_Excel_Data_CTRL80\GPR/pred_Data_230_280_GPR_Type01.csv
+Type02,230,80,2.1394380999263376,Type04,Fin_Excel_Data_CTRL80\GPR/pred_Data_230_280_GPR_Type02.csv
+Type03,230,80,1.6060043999459594,Type06,Fin_Excel_Data_CTRL80\GPR/pred_Data_230_280_GPR_Type03.csv
+Type04,230,80,1.5518221000675112,Type06,Fin_Excel_Data_CTRL80\GPR/pred_Data_230_280_GPR_Type04.csv
+Type05,240,80,1.6559857999673113,Type00,Fin_Excel_Data_CTRL80\GPR/pred_Data_230_280_GPR_Type05.csv
+Type06,230,80,2.065846599987708,Type03,Fin_Excel_Data_CTRL80\GPR/pred_Data_230_280_GPR_Type06.csv
+Type07,250,80,1.6249011000618339,Type00,Fin_Excel_Data_CTRL80\GPR/pred_Data_230_280_GPR_Type07.csv

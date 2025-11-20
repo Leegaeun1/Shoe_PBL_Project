@@ -28,15 +28,23 @@ from matplotlib.ticker import MultipleLocator
 Data_DIR = "control_points_master_test_Q" 
 
 # 정답 파일 경로
-FILE_A =os.path.join(
-    Data_DIR,
-    "control_points_master_test_Q.csv"
-)
+# FILE_A =os.path.join(
+#     Data_DIR,
+#     "control_points_master_test_Q.csv"
+# )
 # 예측 파일 경로
-FILE_B =os.path.join(
-    Data_DIR,
-    "pred_Data_230_280_ge_SVR.csv"
-)
+# FILE_B =os.path.join(
+#     Data_DIR,
+#     "pred_Data_230_280_ge.csv"
+# )
+TYPE = "Type00"
+OUTPUT_NAME = "PCA"
+
+FILE_A = fr"Fin_Excel_Data_CTRL80\REAL\{TYPE}_all_Real.csv"
+FILE_B = fr"Fin_Excel_Data_CTRL80\PCA\pred_Data_230_280_{OUTPUT_NAME}_{TYPE}.csv"
+#FILE_B = "Fin_Excel_Data1\control_points_scaled_230_280mm.csv"
+
+
 
 TARGET_SIZES = None  # None이면 공통 사이즈 전부, 예: [230,240]
 USE_BSPLINE = True  # 제어점 듬성듬성이면 True
@@ -48,7 +56,7 @@ SAVE_PLOTS = True
 SHOW_PLOTS = False
 SAVE_PER_SIZE_STATS = False     # ← 개별 compare_stats_<size>.csv 저장 여부
 SAVE_DISTANCE_SERIES = False    # ← distances_* 저장 여부
-OUT_ROOT = "."                  # 타임스탬프 폴더 상위
+OUT_ROOT = ".\Compare_GPR_CTRL20"                  # 타임스탬프 폴더 상위
 # =============================
 
 # ---------- 공용 유틸 ----------
@@ -214,7 +222,6 @@ def load_rows_any(path):
     if not out:
         raise RuntimeError(f"No valid numeric rows in {path}")
     return out
-
 # ---------- 비교 ----------
 def compare_one_size(Pa, Pb, size, use_bspline=False, degree=3, samples=1500,
                      closed=True, out_dir=".", save_series=False, save_stats=False):
@@ -233,7 +240,7 @@ def compare_one_size(Pa, Pb, size, use_bspline=False, degree=3, samples=1500,
     # 3) A의 주축 기준으로 둘 다 '뒤꿈치 y=0, +y=앞꿈치' 프레임으로 강체변환
     v1, v2, _ = pca_major_axis(Ca)
     Ca_h, R, y0 = to_heel_up_frame(Ca, v1=v1, v2=v2, y0_shift=None)
-    Cb_h, _, _ = to_heel_up_frame(Cb, v1=v1, v2=v2, y0_shift=y0)  # 동일 y0 기준
+    Cb_h, _, _ = to_heel_up_frame(Cb, v1=v1, v2=v2, y0_shift=None)  # 동일 y0 기준
 
     # 4) 거리 계산(강체변환이라 거리 보존)
     d_ab = nearest_distances(Ca_h, Cb_h, chunk=4000)
@@ -242,8 +249,6 @@ def compare_one_size(Pa, Pb, size, use_bspline=False, degree=3, samples=1500,
 
     # 5) (선택) 저장물 ...
     # [save_stats, save_series 블록은 기존 그대로]
-
-    # 6) 시각화 (y축 뒤집지 않습니다!)
 
     if SAVE_PLOTS:
         plt.figure(figsize=(5,9))
@@ -260,13 +265,24 @@ def compare_one_size(Pa, Pb, size, use_bspline=False, degree=3, samples=1500,
         plt.plot(Cb_h_plot[:,0], Cb_h_plot[:,1], lw=2, label="B (Pred)", alpha=0.9)
 
 
-
         ax = plt.gca()                     # ← 축 객체 얻기
-        ax.set_aspect("equal", "box")      # ← 여기에 적용
+        
+        # ----------------------------------------------------
+        # ★★★ 수정 사항: X축 범위 및 눈금 통일 ★★★
+        ax.set_aspect("equal", "box")      # X, Y축 단위를 동일하게 유지
 
-        ax.yaxis.set_major_locator(MultipleLocator(10))   # y축 10단위
-        ax.yaxis.set_minor_locator(MultipleLocator(5))
+        # Y축 설정 (기존)
+        ax.yaxis.set_major_locator(MultipleLocator(10))   # Y축 10단위 주 눈금
+        ax.yaxis.set_minor_locator(MultipleLocator(5))    # Y축 5단위 보조 눈금
         ax.set_ylim(bottom=0)
+        
+        # X축 설정 (추가: 모든 사이즈 플롯에 대해 X축 범위를 0~100mm로 고정)
+        # 신발 폭이 보통 100mm를 넘지 않으므로 100mm로 고정
+        ax.set_xlim(left=-10, right=120) # 발 안쪽 음수 좌표도 일부 고려하여 -10mm부터 시작
+        ax.xaxis.set_major_locator(MultipleLocator(25)) # X축 25단위 주 눈금
+        ax.xaxis.set_minor_locator(MultipleLocator(5))  # X축 5단위 보조 눈금
+        # ----------------------------------------------------
+
         ax.grid(True, which='major', linestyle='--', alpha=0.5)
 
 
@@ -276,7 +292,7 @@ def compare_one_size(Pa, Pb, size, use_bspline=False, degree=3, samples=1500,
         plt.title(ttl)
         plt.grid(True, linestyle="--", alpha=0.5)
         plt.legend()
-        out_png = os.path.join(out_dir, f"compare_{int(size)}.png")
+        out_png = os.path.join(out_dir, f"compare_{OUTPUT_NAME}_{TYPE}_{int(size)}.png")
         plt.savefig(out_png, dpi=180, bbox_inches="tight")
         if SHOW_PLOTS:
             plt.show()
@@ -290,7 +306,8 @@ def compare_one_size(Pa, Pb, size, use_bspline=False, degree=3, samples=1500,
 def main():
     # 타임스탬프 출력 폴더 생성
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = os.path.join(OUT_ROOT, f"compare_{ts}")
+    out_dir = os.path.join(OUT_ROOT, f"compare_{OUTPUT_NAME}_{TYPE}") # KRR, PCA..
+    #out_dir = os.path.join(OUT_ROOT, f"compare_ratio_{TYPE}") # 비율늘린거
     os.makedirs(out_dir, exist_ok=True)
 
     dataA = load_rows_any(FILE_A)
