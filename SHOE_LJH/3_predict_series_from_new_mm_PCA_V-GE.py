@@ -25,7 +25,7 @@ predict_series_from_new_mm_PCA_V-GE.py
 import os, re, csv
 import numpy as np
 
-# -------------------- 경로 설정 (★★★ 수정됨 ★★★) --------------------
+# -------------------- 경로 설정 --------------------
 Data_DIR = "Fin_Excel_Data_PCA" 
 
 TRAIN_CSV =os.path.join(
@@ -66,7 +66,6 @@ def _num_tokens(line):
             out.append(float(t))
     return out
 
-# ★★★ [MODIFIED] load_train_rows (GPR/KRR 버전과 동일) ★★★
 def load_train_rows(path):
     """
     학습 CSV에서 (type, size, P) 목록을 읽는다.
@@ -189,7 +188,6 @@ def tangents_normals(P):
     Nvec = np.stack([-T[:,1], T[:,0]], axis=1)
     return T, Nvec
 
-# ★★★ [NEW] 헬퍼 함수 추가 (GPR/KRR 버전과 동일) ★★★
 def parse_side_from_filename(path, default="N/A"):
     """
     'control_points_master_L_...csv' 같은 파일명에서 'L' 또는 'R'을 추론합니다.
@@ -212,7 +210,7 @@ def parse_side_from_filename(path, default="N/A"):
             
     return default
 
-# -------- 트랙 선택 (★★★ GPR/KRR 버전과 동일하게 교체 ★★★) --------
+# -------- 트랙 선택 --------
 def find_best_track_and_base(all_rows, P_new_resampled):
     """
     [MODIFIED] 'Type'을 기준으로 트랙을 선택하는 함수
@@ -269,7 +267,7 @@ def find_best_track_and_base(all_rows, P_new_resampled):
     track_filtered.sort(key=lambda x: x[0])
     return track_filtered, base_P, best_type
 
-# -------- PCA 길이 보정 함수 (GPR 버전과 동일) --------
+# -------- PCA 길이 보정 함수 --------
 def pca_major_axis(P):
     C = P - P.mean(axis=0, keepdims=True)
     U, S, Vt = np.linalg.svd(C, full_matrices=False)
@@ -408,7 +406,7 @@ def main():
         pred_shapes, sizes_target.tolist(), tol_mm=1.0 
     )
 
-    # 9) [MODIFIED] 헤더 및 Type/Side 포함하여 저장
+    # 9) 헤더 및 Type/Side 포함하여 저장
     
     # 'side' 추론
     side_str = parse_side_from_filename(TRAIN_CSV, default="N/A")

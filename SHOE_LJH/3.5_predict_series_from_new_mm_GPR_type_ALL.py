@@ -6,17 +6,17 @@ from datetime import datetime
 # NOTE: 이 스크립트를 실행하려면 scikit-learn이 필요합니다.
 
 # ========= 전역 설정 =========
-Data_DIR = "20251120/CTRL40"
+Data_DIR = "20251120/CTRL100"
 MASTER_CSV = os.path.join(
     Data_DIR,
-    "control_points_master_L_20251120.csv" 
+    "control_points_master_L_20251124.csv" 
 )
 
 # 1. 통합 예측 결과 저장 경로
 SAVE_UNIFIED_FILENAME = "pred_Data_GPR_230_280.csv"
 SAVE_PRED_PATH = os.path.join(Data_DIR, SAVE_UNIFIED_FILENAME)
 
-# 2. 실행 시간 요약 저장 경로 (★ 추가된 부분)
+# 2. 실행 시간 요약 저장 경로
 SAVE_SUMMARY_FILENAME = "gpr_runtime_summary.csv"
 SAVE_SUMMARY_PATH = os.path.join(Data_DIR, SAVE_SUMMARY_FILENAME)
 
@@ -329,7 +329,7 @@ def process_gpr_for_type(test_type, test_size_mm):
         row = [test_type, side_str, int(s)] + [f"{v:.6f}" for v in P.reshape(-1)]
         result_rows.append(row)
         
-    # ★ L(포인트 개수)도 함께 반환
+    # L(포인트 개수)도 함께 반환
     return result_rows, best_type, L 
 
 # ----------------------------- Main -----------------------------
@@ -342,24 +342,24 @@ def main():
     print(f"[INFO] Target Types: {sorted_types}")
     
     all_unified_rows = [] 
-    runtime_stats = [] # ★ 실행 시간 저장용 리스트
+    runtime_stats = [] # 실행 시간 저장용 리스트
     
     for test_type in sorted_types:
         min_size = min_sizes[test_type]
         print(f"\n>>> Processing '{test_type}' (Base: {min_size}mm)...")
         
-        start_t = time.perf_counter() # ★ 타이머 시작
+        start_t = time.perf_counter() # 타이머 시작
         
         try:
             rows, matched_type, points_count = process_gpr_for_type(test_type, min_size)
             all_unified_rows.extend(rows)
             
-            end_t = time.perf_counter() # ★ 타이머 종료
+            end_t = time.perf_counter() # 타이머 종료
             elapsed = end_t - start_t
             
             print(f"    [DONE] Matched: '{matched_type}', Time: {elapsed:.2f}s")
             
-            # ★ 통계 저장
+            # 통계 저장
             runtime_stats.append({
                 "Type": test_type,
                 "Base_Size": min_size,
@@ -390,7 +390,7 @@ def main():
             w.writerows(all_unified_rows)
         print(f"\n[SAVED] Unified Prediction -> {SAVE_PRED_PATH}")
     
-    # 2. 실행 시간 요약 파일 저장 (★ 추가된 기능)
+    # 2. 실행 시간 요약 파일 저장 
     if runtime_stats:
         os.makedirs(os.path.dirname(SAVE_SUMMARY_PATH), exist_ok=True)
         fieldnames = ["Type", "Base_Size", "Matched_Type", "Time_sec", "Points"]

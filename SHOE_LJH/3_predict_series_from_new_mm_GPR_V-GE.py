@@ -586,15 +586,14 @@ def main():
 
     # 8) [MODIFIED] 헤더 및 Type/Side 포함하여 저장
     
-    # ★★★ 'side' 추론 (TRAIN_CSV 파일명 기반) ★★★
-    # (또는 NEW230_CSV에서 추론하려면 NEW230_CSV를 인자로 넣으세요)
+    #  'side' 추론 (TRAIN_CSV 파일명 기반) 
     side_str = parse_side_from_filename(TRAIN_CSV, default="N/A")
     print(f"[INFO] Inferred side='{side_str}' from training data path '{TRAIN_CSV}'")
 
     with open(SAVE_PRED, "w", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         
-        # ★★★ 1. 헤더 생성 및 저장 ★★★
+        #  1. 헤더 생성 및 저장 
         # P_new (L, 2)의 L (포인트 수, 예: 40)을 가져옴
         num_points = P_new.shape[0] 
         header = ["Type", "side", "size"]
@@ -604,7 +603,7 @@ def main():
         
         w.writerow(header) # CSV 파일에 헤더 쓰기
         
-        # ★★★ 2. 데이터 행 저장 ★★★
+        #  2. 데이터 행 저장 
         for s, P in zip(sizes_target, pred_shapes_adj):
             # 행 구성: [Type, side, size, x1, y1, x2, y2, ...]
             row = [
@@ -617,7 +616,6 @@ def main():
 
     print(f"\n[OK] Saved predictions to -> {SAVE_PRED}")
     print(f"[INFO] Based on new sample's match with Type: '{best_type}'")
-    # (이하 기존 print문 동일)
     print("[INFO] PC1 lengths before/after cap (mm):")
     print("      sizes :", sizes_target.tolist())
     print("      before:", [round(x,3) for x in L_before.tolist()])

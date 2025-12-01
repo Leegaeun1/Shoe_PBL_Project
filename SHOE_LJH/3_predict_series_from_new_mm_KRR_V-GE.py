@@ -344,9 +344,7 @@ def enforce_size_caps_monotone_dual(P_list, sizes, tol_L1=1.0, tol_L2=1.0): # �
     # 여기서 목표 사이즈는 보통 길이 기준이므로, 폭의 목표값 U2는 단순한 s+tol이 아닌,
     # 예측된 PC1 길이에 비례하거나, TRAIN data의 L2 경향에 기반한 L2_pred + tol_L2로 제한할 수 있습니다.
     # 단순화를 위해, 여기서는 TRAIN data의 L2 예측값에 절대 오차 tol_L2만 더한 값으로 제한하겠습니다.
-    
-    # **중요**: L2 예측값 자체는 L2_pred이므로, L2가 's'에 묶이지 않으므로,
-    # L2_cap은 L2_pred + tol_L2로 제한하는 것이 합리적입니다.
+
     U2 = L2_pred + float(tol_L2) 
     L2_cap = np.minimum(L2_pred, U2)
     
@@ -582,9 +580,6 @@ def main():
     base = chordlen_resample(base, L)
     P_new = chordlen_resample(P_new_raw, L) # P_new도 L개로 통일
 
-    # ... (기존 2, 3, 4, 5번 항목은 그대로 둠) ...
-    # [핵심 수정 1: Y축 원점 정렬]
-    # (이하 KRR 스크립트의 기존 로직 유지)
     all_P = [P_new, base] + Ps
     min_y = min(P.min(axis=0)[1] for P in all_P)
     
@@ -647,8 +642,6 @@ def main():
     pred_shapes_adj, L1_before, L1_after, L2_before, L2_after = enforce_size_caps_monotone_dual(
         pred_shapes, sizes_target.tolist(), tol_L1=1.0, tol_L2=1.0 
     )
-
-    # ★★★ [MODIFIED] 저장 로직 전체를 교체 ★★★
     
     # 'side' 추론 (TRAIN_CSV 파일명 기반)
     side_str = parse_side_from_filename(TRAIN_CSV, default="N/A")
@@ -675,7 +668,6 @@ def main():
             ] + [f"{v:.6f}" for v in P.reshape(-1)] # 좌표값
             
             w.writerow(row)
-    # ★★★ (여기까지 교체) ★★★
 
     print(f"[OK] saved -> {SAVE_PRED}")
     print(f"[INFO] Based on new sample's match with Type: '{best_type}'") # best_type 로깅

@@ -16,11 +16,14 @@ for be in preferred_backends:
         pass
 print("Matplotlib backend:", matplotlib.get_backend())
 
-Dir_Name = "L"
+Dir_Name = "R"
+N_CTRL_POINTS = 70  
+
+
 currentTime = datetime.now().strftime("%Y%m%d")
 
-
-OUTPUT_DIR = "20251120/CTRL40" 
+DIR_PATH = fr"C:\Users\user\Documents\GitHub\Shoe_PBL_Project\SHOE_LJH\output_outlines_1030\{Dir_Name}"  # <- 여기에 대상 디렉토리 경로 입력
+OUTPUT_DIR = f"20251126/CTRL{N_CTRL_POINTS}" 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
@@ -612,13 +615,9 @@ if __name__ == "__main__":
     PICK_RADIUS_PX = 12
 
 
-    
-    DIR_PATH = r"C:\Users\user\Documents\GitHub\Shoe_PBL_Project\SHOE_LJH\output_outlines_1030\L"  # <- 여기에 대상 디렉토리 경로 입력
-    
-
     #IMAGE_FILE = "260LB.jpg"
     N_CONTOUR_POINTS = 200
-    N_CTRL_POINTS = 40
+
 
 
     # if not os.path.exists(IMAGE_FILE):

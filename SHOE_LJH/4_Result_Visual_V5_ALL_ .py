@@ -6,10 +6,10 @@ from matplotlib.ticker import MultipleLocator
 # ========= 전역 설정 =========
 
 # 1. 경로 설정
-Data_DIR = "20251120/CTRL40"
+Data_DIR = "20251120/CTRL100"
 
 # Master Reference 파일 (정답지)
-MASTER_REF_FILE = os.path.join(Data_DIR, "control_points_master_L_20251120.csv")
+MASTER_REF_FILE = os.path.join(Data_DIR, "control_points_master_L_20251124.csv")
 
 # 2. 예측 모델 파일 경로 (통합 파일)
 # 파일명이 실제 환경과 다르다면 이 부분을 수정해주세요.
@@ -18,8 +18,7 @@ PRED_FILES = {
     "KRR":   os.path.join(Data_DIR, "pred_Data_KRR_230_280.csv"),
     "SVR":   os.path.join(Data_DIR, "pred_Data_SVR_230_280.csv"),
     "PCA":   os.path.join(Data_DIR, "pred_Data_PCA_230_280.csv"),
-    "RATIO_CTRL": os.path.join(Data_DIR, "pred_Data_RATIO_CTRL_230_280.csv"),
-    "RATIO_OUTLINE": os.path.join(Data_DIR, "pred_Data_RATIO_OUTLINE_230_280.csv")
+    "RATIO_CTRL": os.path.join(Data_DIR, "pred_Data_RATIO_CTRL_230_280.csv")
 }
 
 # 3. 시각화 스타일 설정 (색상 및 선 모양)
@@ -30,13 +29,12 @@ STYLE_CONFIG = {
     "KRR":   {"color": "blue",   "ls": "--", "lw": 1.5, "alpha": 0.8},
     "SVR":   {"color": "purple", "ls": "-.", "lw": 1.5, "alpha": 0.8},
     "PCA":   {"color": "red",    "ls": ":",  "lw": 2.0, "alpha": 0.9},
-    "RATIO_CTRL": {"color": "orange", "ls": "--", "lw": 1.5, "alpha": 0.8},
-    "RATIO_OUTLINE": {"color": "pink", "ls": "-", "lw": 1.5, "alpha": 0.8}
+    "RATIO_CTRL": {"color": "orange", "ls": "--", "lw": 1.5, "alpha": 0.8}
 }
 
 # 4. 분석 대상 및 출력 설정
 TARGET_TYPES = [f"Type{i:02d}" for i in range(8)] # Type00 ~ Type07
-OUT_ROOT = "20251120/CTRL40/Multi_Compare_Output"
+OUT_ROOT = "20251125/CTRL100/Multi_Compare_Output_100"
 
 USE_BSPLINE = True
 DEGREE = 3

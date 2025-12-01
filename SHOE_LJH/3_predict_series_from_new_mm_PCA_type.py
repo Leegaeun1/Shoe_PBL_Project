@@ -22,7 +22,7 @@ from datetime import datetime
 
 Data_DIR = "Fin_Excel_Data_CTRL40"
 
-# ★ 테스트에 사용할 타입(hold-out 타입)과 사이즈
+# 테스트에 사용할 타입(hold-out 타입)과 사이즈
 TEST_TYPE 	 = "Type03" 	# 예측 시리즈의 기준 타입
 TEST_SIZE_MM = 230 			# 예측 시리즈의 기준 사이즈 (P_new)
 
@@ -106,10 +106,10 @@ def load_train_and_new_from_same_csv(path, test_type, test_size):
 		except Exception:
 			continue
 			
-		# ★ 홀드아웃 로직: TEST_TYPE, TEST_SIZE 행만 new_rows로 분리
+		# 홀드아웃 로직: TEST_TYPE, TEST_SIZE 행만 new_rows로 분리
 		if type_str == test_type and size == test_size:
 			new_rows.append((P, side_str))
-		# ★ TEST_TYPE과 동일한 모든 행을 학습 데이터에서 제외 (홀드아웃)
+		# TEST_TYPE과 동일한 모든 행을 학습 데이터에서 제외 (홀드아웃)
 		elif type_str != test_type:
 			train_rows.append((type_str, size, P))
 			
@@ -189,7 +189,6 @@ def tangents_normals(P):
 	Nvec = np.stack([-T[:,1], T[:,0]], axis=1)
 	return T, Nvec
 
-# ★★★ [NEW] 헬퍼 함수 추가 (GPR/KRR 버전과 동일) ★★★
 def parse_side_from_filename(path, default="N/A"):
 	"""
 	'control_points_master_L_...csv' 같은 파일명에서 'L' 또는 'R'을 추론합니다.
@@ -247,7 +246,7 @@ def find_best_track_and_base(all_rows, P_new_resampled, alpha_pca=0.5):
 		base_P_resampled = chordlen_resample(base_P_for_type, L_points)
 		_, sc_dist, _, _ = cyclic_align(P_new_resampled, base_P_resampled)
 		
-		# --- ★★★ PCA 방향성 비교 로직 ★★★
+		# PCA 방향성 비교 로직 
 		v1_base, _, _, L1_base = pca_major_axis(base_P_resampled)
 		dir_similarity = np.abs(np.dot(v1_new, v1_base))
 		sc_pca_penalty = alpha_pca * (1.0 - dir_similarity)
@@ -267,11 +266,11 @@ def find_best_track_and_base(all_rows, P_new_resampled, alpha_pca=0.5):
 	base_row = min(best_track_list, key=lambda x: x[0])
 	base_P = base_row[1]
 	
-	# 학습에 사용할 트랙 데이터 필터링 (230-290 범위)
-	track_filtered = [(s, P) for s, P in best_track_list if 230 <= s <= 290]
+	# 학습에 사용할 트랙 데이터 필터링 (230-280 범위)
+	track_filtered = [(s, P) for s, P in best_track_list if 230 <= s <= 280]
 	
 	if not track_filtered:
-		print(f"Warning: No samples in 230-290 range for '{best_type}'. Using all {len(best_track_list)} samples.")
+		print(f"Warning: No samples in 230-280 range for '{best_type}'. Using all {len(best_track_list)} samples.")
 		track_filtered = best_track_list
 		if not track_filtered:
 			raise RuntimeError(f"Type '{best_type}' was selected but contains no data.")
@@ -358,7 +357,7 @@ def main():
 	sizes_train = [s for s,_ in track]
 	Ps = [P for _,P in track]
 	if not Ps:
-		raise RuntimeError(f"선택된 트랙(Type: {best_type})에 230~290 구간 샘플이 없습니다.")
+		raise RuntimeError(f"선택된 트랙(Type: {best_type})에 230~280 구간 샘플이 없습니다.")
 
 	# 2) 동일 포인트 수로 리샘플
 	Ps = [chordlen_resample(P, L) for P in Ps] 
@@ -400,7 +399,7 @@ def main():
 	lr_model.fit(X, Z)
 
 	# 6) 예측
-	sizes_target = np.arange(230, 295, 5, dtype=int)
+	sizes_target = np.arange(230, 285, 5, dtype=int)
 	Xt = sizes_target.reshape(-1, 1)
 	
 	Z_pred = lr_model.predict(Xt) # Xt (K, 1) -> Z_pred (K, k)
@@ -456,7 +455,7 @@ def main():
 	if tr_min is not None and (sizes_target[0] < tr_min or sizes_target[-1] > tr_max):
 		ext_note = " (경고: 일부 타겟 사이즈는 학습 범위를 벗어나 외삽입니다)"
 	print(f"[INFO] chosen train sizes from type '{best_type}': {sizes_train[:10]}{'...' if len(sizes_train)>10 else ''}")
-	print(f"[INFO] PCA/LR train range: [{tr_min}, {tr_max}] -> predict 230..290{ext_note}")
+	print(f"[INFO] PCA/LR train range: [{tr_min}, {tr_max}] -> predict 230..280{ext_note}")
 
 if __name__ == "__main__":
 	try:

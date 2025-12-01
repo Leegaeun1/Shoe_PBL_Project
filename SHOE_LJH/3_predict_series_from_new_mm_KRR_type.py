@@ -13,14 +13,14 @@ import numpy as np
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.metrics.pairwise import rbf_kernel, linear_kernel
 
-# -------------------- ★ 경로 및 설정 ★ --------------------
+# --------------------  경로 및 설정  --------------------
 Data_DIR = "Fin_Excel_Data1"
 
-# ★ 테스트에 사용할 타입(hold-out 타입)과 사이즈
+#  테스트에 사용할 타입(hold-out 타입)과 사이즈
 TEST_TYPE = "Type07" # 예측 시리즈의 기준 타입 (홀드아웃할 타입)
 TEST_SIZE_MM = 250 # 예측 시리즈의 기준 사이즈 (P_new로 사용)
 
-# ★ TRAIN / NEW 모두 동일한 마스터 CSV 사용 (요청 사항 반영)
+#  TRAIN / NEW 모두 동일한 마스터 CSV 사용 (요청 사항 반영)
 MASTER_CSV = os.path.join(
     Data_DIR,
     "control_points_master_L_20251118.csv"
@@ -28,7 +28,7 @@ MASTER_CSV = os.path.join(
 TRAIN_CSV = MASTER_CSV
 NEW230_CSV = MASTER_CSV  # P_new 로드에 사용 (경로만 동일)
 
-# ★ 예측 결과 파일 이름에 테스트 타입이 들어가도록 (요청 사항 반영)
+#  예측 결과 파일 이름에 테스트 타입이 들어가도록 (요청 사항 반영)
 SAVE_PRED = os.path.join(
     Data_DIR,
     f"pred_Data_230_280_KRR_{TEST_TYPE}.csv"

@@ -1,0 +1,9 @@
+Type,Match
+Type00,Type07
+Type01,Type06
+Type02,Type05
+Type03,Type06
+Type04,Type05
+Type05,Type03
+Type06,Type03
+Type07,Type00
