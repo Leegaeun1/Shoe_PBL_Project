@@ -1,7 +1,7 @@
 Type,Base_Size,Matched_Type,Time_sec,Points
-Type00,240,Self (Ratio),0.000149,70
+Type00,240,Self (Ratio),0.000162,70
 Type01,230,Self (Ratio),0.000148,70
-Type02,230,Self (Ratio),0.000122,70
-Type03,230,Self (Ratio),0.000141,70
-Type04,230,Self (Ratio),0.000125,70
-Type05,250,Self (Ratio),0.000141,70
+Type02,230,Self (Ratio),0.000126,70
+Type03,230,Self (Ratio),0.000146,70
+Type04,230,Self (Ratio),0.000129,70
+Type05,250,Self (Ratio),0.000134,70

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load the dataset
-file_path = '20251125/l_r_combine.csv'
+file_path = '20251125/Final_Performance_Summary_All_CTRLs_V2.csv'
 df = pd.read_csv(file_path)
 
 # 1. Filter out 'PCA_GPR'
@@ -36,7 +36,7 @@ for i, metric in enumerate(metrics):
     plt.legend(title='Model')
 
 plt.tight_layout()
-plt.savefig('performance_metrics_plot_combine.png')
+plt.savefig('performance_metrics_plot_combine__2.png')
 
 # 4. Generate a summary table for the text response
 summary_table = df_filtered.groupby(['Model', 'CTRL_Count'])[metrics].mean()

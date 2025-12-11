@@ -1,9 +1,0 @@
-Type,Base_Size,Matched_Type,Time_sec,Points
-Type00,240,Type05,2.3148,100
-Type01,230,Type03,1.4992,100
-Type02,230,Type04,1.4563,100
-Type03,230,Type06,1.2868,100
-Type04,230,Type06,1.2863,100
-Type05,240,Type00,1.2628,100
-Type06,230,Type03,1.4604,100
-Type07,250,Type00,1.2698,100

@@ -13,19 +13,24 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.metrics.pairwise import rbf_kernel, linear_kernel
 
 # =========================================================
-# [클래스] ShapePredictorEnv: "Legacy Logic" 완벽 이식 버전 (수정됨)
+# [클래스] ShapePredictorEnv: "Legacy Logic" 
 # =========================================================
 class ShapePredictorEnv:
+    # -----------------------------------------------------
+    # 0. 초기화
+    # -----------------------------------------------------
     def __init__(self, master_csv_path):
+        '''데이터 로드 후 존재하는 모든 Type목록 저장'''
         self.master_csv_path = master_csv_path
         self.full_data = self._load_full_master_data(master_csv_path)
         self.all_types = sorted([t for t in self.full_data.keys() if t.startswith("Type")])
         print(f"[Env] 총 {len(self.all_types)}개의 Type을 로드했습니다.")
 
     # -----------------------------------------------------
-    # 1. 데이터 로드 (동일)
+    # 1. 데이터 로드
     # -----------------------------------------------------
     def _read_text(self, path, encodings=("utf-8-sig","utf-8","cp949","latin-1")):
+        '''한글 깨짐 또는 에러 방지'''
         for enc in encodings:
             try:
                 with open(path, "r", encoding=enc) as f: return f.read()
@@ -33,6 +38,7 @@ class ShapePredictorEnv:
         raise ValueError("Encoding Error")
 
     def _load_full_master_data(self, path):
+        '''데이터를 Type: { Size : (좌표 배열, Side문자열)} 형태의 딕셔너리로 구조화하여 반환'''
         text = self._read_text(path)
         data_dict = {}
         _NUM = re.compile(r'^[\+\-]?(?:\d+\.?\d*|\.\d+)(?:[eE][\+\-]?\d+)?$')
@@ -58,9 +64,11 @@ class ShapePredictorEnv:
         return data_dict
 
     # -----------------------------------------------------
-    # 2. 기하 유틸리티 (동일)
+    # 2. 기하 유틸리티
     # -----------------------------------------------------
     def chordlen_resample(self, P, n):
+        '''입력된 좌표 P를 n개의 점으로 다시 찍음
+           점 사이의 거리를 기준으로 등 간격으로 점을 배치'''
         P = np.asarray(P, float)
         seg = np.linalg.norm(np.diff(P, axis=0), axis=1) if len(P)>1 else np.array([])
         u = np.zeros(len(P)); 
@@ -72,6 +80,8 @@ class ShapePredictorEnv:
         return np.stack([np.interp(s, u, P[:,0]), np.interp(s, u, P[:,1])], axis=1)
 
     def cyclic_align(self, P, Q):
+        '''P와 가장 오차가 적은 배치를 찾아낸다.
+           Q의 점들을 한칸씩 밀거나 뒤집음'''
         n = len(P)
         best = (None, 1e30, 0, False)
         for rev in [False, True]:
@@ -83,6 +93,9 @@ class ShapePredictorEnv:
         return best
 
     def tangents_normals(self, P):
+        '''접선 벡터와 법선 벡터 계산
+           길이 늘리기(접선)
+           볼/두께 방향(법선)'''
         T = np.zeros_like(P)
         if len(P) >= 2:
             T[1:-1] = P[2:] - P[:-2]
@@ -93,6 +106,8 @@ class ShapePredictorEnv:
         return T, Nvec
     
     def pca_major_axis(self, P):
+        '''PCA를 이용해 형상의 주축(가장 긴 방향)을 찾음. 
+           => 신발의 실제 길이(L) 계산'''
         C = P - P.mean(axis=0, keepdims=True)
         _, _, Vt = np.linalg.svd(C, full_matrices=False)
         v1 = Vt[0]
@@ -102,6 +117,7 @@ class ShapePredictorEnv:
         return v1, None, heel_idx, L
 
     def shrink_along_pc1(self, P, target_L):
+        '''형상 P를 주축 방향으로 강제로 줄이거나 늘려서 목표 길이 target_L에 맞춤'''
         v1, _, heel_idx, L_curr = self.pca_major_axis(P)
         if L_curr <= target_L + 1e-9: return P
         heel = P[heel_idx]
@@ -112,6 +128,7 @@ class ShapePredictorEnv:
         return heel + np.outer(r1 * alpha, v1) + P_ortho
 
     def enforce_size_caps_monotone(self, P_list, sizes):
+        '''작은 사이즈보다 큰 사이즈의 형상이 더 짧게 예측 -> 강제로 길이 보정하여 모순 없앰'''
         n = len(P_list)
         L_pred = []
         for P in P_list:
@@ -129,9 +146,10 @@ class ShapePredictorEnv:
         return P_adj_list
 
     # -----------------------------------------------------
-    # 3. Best Match (동일)
+    # 3. Best Match
     # -----------------------------------------------------
     def find_best_track(self, train_dict, P_target):
+        '''예측 대상(P_target)과 가장 닮은 훈련 데이터를 찾음'''
         L = len(P_target)
         best_match = (None, 1e30, None)
         for t_type, s_map in train_dict.items():
@@ -147,9 +165,10 @@ class ShapePredictorEnv:
         return best_match[2], best_match[0]
 
     # =====================================================
-    # ★ [복구] Safe Prediction Logic (기존 코드 완벽 이식)
+    # Safe Prediction Logic
     # =====================================================
     def _linear_fit_multi(self, x, Y):
+        '''단순 선형 회귀 수행.'''
         x, Y = np.asarray(x, float), np.asarray(Y, float)
         X = np.stack([x, np.ones_like(x)], axis=1)
         XtX = X.T @ X + 1e-12 * np.eye(2)
@@ -157,12 +176,16 @@ class ShapePredictorEnv:
         return beta[0], beta[1]
 
     def _linear_predict_multi(self, a, b, x): return a * float(x) + b
+    '''단순 선형 회귀 수행.'''
 
     def _blend_to_boundary(self, Y_linear, Y_boundary, dist_mm, tau_mm=8.0):
+        '''블렌딩 함수 : 학습 데이터 경계에서 멀어질수록 머신러닝 값 대신 선형 예측 값을 사용하도록 가중치를 섞음.
+           dist_mm가 멀어질수록 선형 모델의 비중을 높임'''
         gamma = np.exp(-dist_mm / max(tau_mm, 1e-6))
         return gamma * Y_boundary + (1.0 - gamma) * Y_linear
 
     def linear_piecewise_predict(self, s_train, Y, s_targets):
+        '''데이터 점이 너무 적을때(2개 미만) 사용하는 단순 선간 보간법'''
         s_train, Y = np.array(s_train, float), np.asarray(Y, float)
         out = np.zeros((len(s_targets), Y.shape[1]), float)
         order = np.argsort(s_train)
@@ -179,10 +202,14 @@ class ShapePredictorEnv:
         return out
 
     # -----------------------------------------------------
-    # 4. 모델별 Fit & Predict (Safe Logic 적용)
+    # 4. 모델별 Fit & Predict
     # -----------------------------------------------------
     def fit_predict_safe(self, model_name, x_train, Y, x_test, override_tau=None):
-        """기존 코드의 gpr/svr/krr_fit_predict_safe 함수 통합"""
+        """핵심 예측 엔진
+           1. 데이터 정렬 및 2차원 변환
+           2. 모델에 따라 GPR, SVR, KRR 객체를 생성하고 학습(fit)시킴
+           3. 학습 범위 내 : 머신러닝 모델 결과 사용, 학습 범위 밖 : 데이터 끝부분의 선형 기울기를 구해 선형으로 예측하되,
+              경계면에서는 부드럽게 이어줌 => 안정적으로 예측"""
         x_train, Y, x_test = np.asarray(x_train, float), np.asarray(Y, float), np.asarray(x_test, float)
         order = np.argsort(x_train)
         x_train, Y = x_train[order], Y[order]
@@ -204,7 +231,6 @@ class ShapePredictorEnv:
             
         elif "KRR" in model_name:
             gamma = 1.0 / (2.0 * (20.0**2) + 1e-12)
-            # ★ [수정] KRR 커널 함수: 1D 입력에 대한 차원 방어 로직 추가
             def kernel_callable(A, B):
                 A = np.asarray(A)
                 B = np.asarray(B)
@@ -262,6 +288,12 @@ class ShapePredictorEnv:
     # 메인 처리 로직
     # -----------------------------------------------------
     def process_single_type(self, target_type, model_type, target_sizes):
+        '''하나의 타입을 처리하는 함수
+           1. 타겟 데이터 로드 및 리샘플링
+           2. 유사한 참조 모델 찾기
+           3. 참조 모델의 형상 정렬
+           4. 모델링 분기 : PCA 또는 일반
+           5. 결과 보정 후 CSV 행 데이터 생성'''
         target_map = self.full_data[target_type]
         min_size = min(target_map.keys())
         P_new, side_str = target_map[min_size]
