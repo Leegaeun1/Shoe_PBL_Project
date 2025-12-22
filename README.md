@@ -1,4 +1,4 @@
-<div align="center">
+<div>
 
   # 👟 Shoe Shape Prediction AI
   **머신러닝 기반 신발 사이즈별 비선형 형상 예측 모델**
@@ -42,7 +42,7 @@
 
 ## 🔄 Project Pipeline
 
-<div align="center">
+<div>
   <table>
     <tr>
       <th width="25%">Phase 1. 이미지 전처리</th>
