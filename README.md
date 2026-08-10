@@ -80,7 +80,7 @@ python 0_Master_Runner.py
 The generated prediction results will be stored in:
 
 ```text
-output_images/
+origin_insole/
 output_outlines/
 ```
 
