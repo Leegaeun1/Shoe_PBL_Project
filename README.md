@@ -63,21 +63,29 @@ SHOE_PBL_PROJECT/
 ### Requirements
 
 - Python 3.10+
-- OpenCV
 - NumPy
 - Pandas
-- Scikit-learn
+- OpenCV
+- SciPy
 - Matplotlib
+- scikit-learn
+- openpyxl
+
+Install the required packages:
+
+```bash
+pip install -r requirements.txt
+```
 
 ### Execute
 
-Run the complete pipeline using:
+Run the complete prediction pipeline:
 
 ```bash
 python 0_Master_Runner.py
 ```
 
-The generated prediction results will be stored in:
+The generated outputs will be stored in:
 
 ```text
 origin_insole/
