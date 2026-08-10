@@ -1,7 +1,8 @@
 <div>
 
   # 👟 Shoe Shape Prediction AI
-  **머신러닝 기반 신발 사이즈별 비선형 형상 예측 모델**
+
+  **Machine Learning-Based Nonlinear Shoe Shape Prediction Across Multiple Sizes**
   <br/>
 
   <br/>
@@ -15,18 +16,15 @@
 
 <br/>
 
-## 1. 프로젝트 개요 (Overview)
+## 1. Overview
 
-이 프로젝트에서 저희는 신발 제조 공정의 효율화를 위해, **단일 사이즈 이미지 하나만으로 다른 모든 사이즈의 정밀한 외곽선을 예측하는 머신러닝 시스템**을 설계하고 구현했습니다.
+This project presents a machine learning framework that predicts accurate shoe outlines for multiple sizes using only a single shoe image.
 
-기존 신발 제조 현장에서는 사이즈를 확장(Grading)할 때 단순 비율 확대 방식을 주로 사용합니다. 하지만 저희는 "발의 크기가 커진다고 해서 발볼의 너비가 정비례하게 커지지는 않는다"는 인체공학적 비선형성에 주목했습니다. 단순 스케일업(Scale-up) 방식은 사이즈가 커질수록 신발의 모양이 기형적으로 변하는 문제를 야기합니다.
+In conventional shoe manufacturing, size grading is typically performed using simple geometric scaling. However, human feet do not grow proportionally; for example, foot width does not increase linearly with foot length. Consequently, conventional scaling methods often produce unrealistic shoe shapes as the target size becomes larger.
 
-이를 해결하기 위해 저희는 머신러닝 기반의 비선형 회귀 모델을 도입했습니다. 사이즈 변화에 따른 미세한 형상 변화 패턴을 학습하여, 230mm 신발 사진 한 장만 있어도 280mm 신발의 정확한 라스트(Last, 신발 틀) 형상을 예측할 수 있는 기술을 개발했습니다.
+To address this limitation, we propose a nonlinear regression-based prediction model that learns the geometric variation of shoe contours across different sizes. Given only a single shoe image (e.g., size 230 mm), the proposed model predicts accurate contours for other shoe sizes (e.g., 280 mm) while preserving realistic shape characteristics.
 
-* 개발 기간 : 2025.09~2025.11
-* 참여 인원 : 2명
-  * 김민준 : 데이터 전처리
-  * 이가은 : 예측 및 시각
+- **Development Period:** September 2025 – November 2025
 
 <br/>
 
@@ -39,8 +37,7 @@ SHOE_PBL_PROJECT/
 │   └── CTRL20 ~ CTRL50
 │
 ├── origin_insole/            # Original shoe contour data
-├── output_images/            # Predicted contour visualizations
-├── output_outlines/          # Predicted contour coordinates
+├── output_outlines/          # Predicted contour visualizations
 │
 ├── 0_Master_Runner.py        # Run the complete pipeline
 │
@@ -85,20 +82,20 @@ output_outlines/
 ```
 
 
-## 4. 주요 기능 (Key Features)
+## 4. Key Features
 
-저희가 구현한 시스템의 핵심 기능은 다음과 같습니다.
+The proposed framework provides the following core functionalities.
 
-* **자동 외곽선 추출 (Auto Contour Extraction):** OpenCV의 HSV Masking 기법을 활용하여 다양한 배경의 신발 이미지에서 노이즈를 제거하고 정밀한 외곽선 좌표를 자동으로 추출합니다.
-* **순환 정렬 알고리즘 (Cyclic Data Alignment):** 이미지마다 제각각인 좌표 시작점(Index 0) 문제를 해결하기 위해, 기준 형상에 맞춰 데이터의 위상을 자동으로 회전(Rolling)시켜 정렬하는 전처리 알고리즘을 구현했습니다.
-* **하이브리드 예측 시스템 (Hybrid Prediction):** 학습 데이터 구간 내에서는 RBF 커널 기반의 비선형 모델(KRR/SVR)로 정밀도를 높이고, 외삽(Extrapolation) 구간에서는 선형 모델을 결합하여 예측 안정성을 확보했습니다.
-* **물리적 모순 방지 (Monotonic Constraint):** 예측된 큰 사이즈의 신발이 작은 사이즈보다 길이가 짧아지는 역전 현상을 방지하기 위해, PCA 주축을 기준으로 단조 증가성을 강제하는 후처리 로직을 적용했습니다.
+* **Auto Contour Extraction:** Automatically extracts accurate shoe contours from input images using OpenCV-based HSV masking while effectively removing background noise.
+* **Cyclic Data Alignment:** Since contour coordinates extracted from different images start at arbitrary indices, a cyclic alignment algorithm is applied to synchronize all contour starting points with a reference contour.
+* **Hybrid Shape Prediction:** A hybrid regression framework combines nonlinear kernel-based models (Kernel Ridge Regression and Support Vector Regression) for interpolation with linear regression for extrapolation, improving prediction stability outside the training range.
+* **Monotonic Constraint:** To prevent physically implausible predictions (e.g., a larger shoe becoming shorter than a smaller one), a post-processing algorithm enforces monotonicity along the principal axis obtained by PCA.
 
 <br/>
 
-## 5. 시스템 아키텍처 (System Pipeline)
+## 5. System Pipeline
 
-저희는 데이터의 전처리부터 모델링, 평가까지 이어지는 파이프라인을 구축했습니다. 전체 데이터 처리 흐름은 다음과 같습니다.
+The overall workflow consists of preprocessing, modeling, prediction, and visualization.
 
 <div>
   <table>
@@ -145,33 +142,32 @@ output_outlines/
   </table>
 </div>
 
-1.  **전처리 (Preprocessing):** 입력된 신발 이미지에서 외곽선을 추출한 뒤, `Cyclic Alignment`를 통해 모든 데이터의 좌표 시작점을 통일합니다.
-2.  **모델링 (Modeling):** 정렬된 좌표 데이터를 PCA(주성분 분석)로 차원 축소한 뒤, 사이즈 변화에 따른 주성분의 변화량을 머신러닝 모델(KRR, SVR)로 학습합니다.
-3.  **예측 및 후처리 (Prediction):** 입력된 타겟 사이즈에 맞는 형상을 예측하고, 물리적 모순(길이 역전 등)이 발생하지 않도록 보정하여 최종 좌표를 출력합니다.
+1.  **Preprocessing:**  Shoe contours are extracted from input images and aligned using the proposed cyclic alignment algorithm.
+2.  **Modeling:** The aligned contour coordinates are projected into a low-dimensional latent space using Principal Component Analysis (PCA). The relationship between shoe size and principal components is then learned using machine learning models such as Kernel Ridge Regression (KRR) and Support Vector Regression (SVR).
+3.  **Prediction:** The trained model predicts the contour of the target shoe size. A monotonic constraint is subsequently applied to eliminate physically inconsistent predictions before generating the final contour.
 
 <br/>
 
-## 6. 실험 결과 (Experimental Results)
+## 6. Experimental Results
 
-저희는 개발한 모델의 성능을 검증하기 위해, 단순 비율 확대 방식(`Ratio Control`)과 머신러닝 모델(`PCA_KRR`, `PCA_SVR`)의 예측 정확도를 비교했습니다.
+The proposed method was evaluated by comparing conventional ratio-based grading with machine learning models (KRR and SVR).
 
-![결과 그래프](SHOE_LJH/performance_metrics_plot_combine__2.png)
+![result_graph](5Group.png)
 
-**실험 분석 (Result Analysis)**
-* **비선형성 입증:** 단순 비율 확대 방식(Ratio)은 길이가 커질수록 발볼이 과도하게 넓어지는 오차가 발생했습니다. 반면, 저희가 개발한 **ML 모델은 발볼(Width) 오차를 획기적으로 줄여** 실제 신발의 비선형적인 형상 변화를 잘 반영함을 확인했습니다.
-* **최적 제어점:** 외곽선을 구성하는 제어점(Control Points)이 **40~50개**일 때 연산 효율 대비 예측 성능이 가장 우수함을 확인하여 시스템을 최적화했습니다.
+**Result Analysis**
+* **Verification of Nonlinear Shape Variation:** Conventional ratio-based scaling gradually produced excessive width expansion as shoe size increased. In contrast, the proposed machine learning models significantly reduced width prediction errors and more accurately captured the nonlinear characteristics of shoe shape variation.
+* **Optimal Number of Control Points:** Experimental results demonstrated that using **40–50 control points** provided the best balance between prediction accuracy and computational efficiency.
 
 <br/>
 
-## 7. 한계점 및 향후 과제 (Limitations & Future Work)
+## 7. Limitations and Future Work
 
-**한계점**
-**한계점 (Limitations)**
-* **외삽(Extrapolation) 구간의 불안정성:** 학습 데이터(230~270mm) 범위를 벗어나는 280mm 이상의 사이즈를 예측할 때, 비선형 모델(RBF Kernel)의 특성상 예측값이 급격히 발산하는 현상이 발생했습니다.
-* **데이터 정렬의 민감도:** `Cyclic Alignment` 알고리즘을 도입하여 위상차를 보정했으나, 촬영 각도가 심하게 틀어진(Skewed) 이미지의 경우 여전히 초기 정렬 오차가 모델 성능에 영향을 미쳤습니다.
-* **전처리의 배경 의존성:** 현재의 OpenCV 기반 외곽선 추출 방식은 배경이 복잡하거나 그림자가 짙은 환경에서는 노이즈가 섞이거나 추출 품질이 저하되는 한계가 있습니다.
-* **학습 데이터의 부족:** 확보된 신발 데이터의 수와 스타일이 한정적이어서, 다양한 디자인과 형태를 가진 신발에 대해 범용적인 예측 성능을 확보하는 데 어려움이 있었습니다.
+**Limitations**
+* **Instability in Extrapolation:** When predicting shoe sizes beyond the training range (230–270 mm), nonlinear RBF kernel models occasionally exhibited unstable extrapolation behavior.
+* **Sensitivity to Initial Alignment:** Although cyclic alignment substantially reduced phase inconsistencies, large viewpoint distortions in the input images could still affect prediction accuracy.
+* **Background Dependency:**   The current OpenCV-based contour extraction algorithm is sensitive to complex backgrounds and severe shadows, which may degrade contour quality.
+* **Limited Dataset:** The available dataset contains a limited number of shoe styles and sizes, restricting the model's generalization capability.
 
-**향후 과제 (Future Work)**
-* **데이터 증강:** 회전(Rotation), 비틀림(Shearing), 시점 변환(Perspective Transform) 등의 Data Augmentation 기법을 적용하여, 다양한 촬영 환경에서도 모델이 잘 동작하도록 일반화 성능을 높일 계획입니다.
-* **3D 형상 재구성으로의 확장:** 현재의 2D 평면 외곽선 예측을 넘어, 멀티뷰(Multi-view) 이미지나 심도(Depth) 정보를 활용하여 신발의 발등 높이와 전체 부피(Volume)까지 예측하는 3D 모델링 프로젝트로 확장하고자 합니다.
+**Future Work**
+* **Data Augmentation:** Future work includes applying rotation, shearing, perspective transformation, and other augmentation techniques to improve robustness under various imaging conditions.
+* **Extension to 3D Shape Reconstruction:** The current framework predicts only 2D shoe contours. Future research will extend the method to reconstruct full 3D shoe geometry by incorporating multi-view images or depth information.
