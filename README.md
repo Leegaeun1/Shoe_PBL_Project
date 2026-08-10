@@ -30,7 +30,62 @@
 
 <br/>
 
-## 2. 주요 기능 (Key Features)
+## 2. Repository Structure
+
+```text
+SHOE_PBL_PROJECT/
+│
+├── 20260106/                 # Experimental datasets
+│   └── CTRL20 ~ CTRL50
+│
+├── origin_insole/            # Original shoe contour data
+├── output_images/            # Predicted contour visualizations
+├── output_outlines/          # Predicted contour coordinates
+│
+├── 0_Master_Runner.py        # Run the complete pipeline
+│
+├── 1_Counter_Code.py         # Extract contour control points
+├── 2_CounterToExcel_Vis_2026.py   # Export contour coordinates
+│
+├── 4_main_controller_2026.py      # Main prediction pipeline
+├── 4_ratio_point_2026.py          # Ratio-based baseline
+│
+├── 5_aggregate_results_2026.py    # Aggregate prediction results
+├── 5_Result_Visual_V8_All_2026.py        # Visualization
+│
+├── Fin_shape_prediction_lib_2026_V2.py   # Prediction library
+├── visualization.py              # Additional visualization
+└── README.md
+```
+
+## 3. How to Run
+
+### Requirements
+
+- Python 3.10+
+- OpenCV
+- NumPy
+- Pandas
+- Scikit-learn
+- Matplotlib
+
+### Execute
+
+Run the complete pipeline using:
+
+```bash
+python 0_Master_Runner.py
+```
+
+The generated prediction results will be stored in:
+
+```text
+output_images/
+output_outlines/
+```
+
+
+## 4. 주요 기능 (Key Features)
 
 저희가 구현한 시스템의 핵심 기능은 다음과 같습니다.
 
@@ -41,7 +96,7 @@
 
 <br/>
 
-## 3. 시스템 아키텍처 (System Pipeline)
+## 5. 시스템 아키텍처 (System Pipeline)
 
 저희는 데이터의 전처리부터 모델링, 평가까지 이어지는 파이프라인을 구축했습니다. 전체 데이터 처리 흐름은 다음과 같습니다.
 
@@ -96,7 +151,7 @@
 
 <br/>
 
-## 4. 실험 결과 (Experimental Results)
+## 6. 실험 결과 (Experimental Results)
 
 저희는 개발한 모델의 성능을 검증하기 위해, 단순 비율 확대 방식(`Ratio Control`)과 머신러닝 모델(`PCA_KRR`, `PCA_SVR`)의 예측 정확도를 비교했습니다.
 
@@ -108,7 +163,7 @@
 
 <br/>
 
-## 5. 한계점 및 향후 과제 (Limitations & Future Work)
+## 7. 한계점 및 향후 과제 (Limitations & Future Work)
 
 **한계점**
 **한계점 (Limitations)**
