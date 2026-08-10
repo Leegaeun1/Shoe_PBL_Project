@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from Fin_shape_prediction_lib import ShapePredictorEnv  # 2번 코드 임포트
+from Fin_shape_prediction_lib_2026 import ShapePredictorEnv  # 2번 코드 임포트
 
 
 
@@ -17,7 +17,7 @@ TARGET_SIZES = np.arange(230, 285, 5, dtype=int)
 EXECUTE_MODELS = [
     "PCA_LINEAR",
 
-    "PCA_GPR",     
+    #"PCA_GPR",     
     "PCA_SVR", 
     "PCA_KRR",
 
@@ -38,8 +38,8 @@ def main():
         # =========================================================
         # [설정 1] 경로 및 데이터 설정
         # =========================================================
-        BASE_DIR = f"20251125/CTRL{Num}"
-        MASTER_CSV_PATH = os.path.join(BASE_DIR, "control_points_master_L_20251124.csv")
+        BASE_DIR = f"20260106/CTRL{Num}"
+        MASTER_CSV_PATH = os.path.join(BASE_DIR, "control_points_master_L_20260106.csv")
 
 
         # 1. 환경 초기화 (데이터 로드)

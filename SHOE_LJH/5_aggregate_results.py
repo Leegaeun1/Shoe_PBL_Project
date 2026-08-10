@@ -7,7 +7,7 @@ import pandas as pd
 # =========================================================
 # [설정] 경로 및 대상
 # =========================================================
-BASE_ROOT = "20251125"
+BASE_ROOT = "20260106"
 TARGET_CTRL_DIRS = [f"CTRL{i}" for i in range(10, 80, 10)] # CTRL10 ~ CTRL70
 TARGET_FILENAME = "model_performance_average_V2.csv" # 각 폴더에서 가져올 파일명
 

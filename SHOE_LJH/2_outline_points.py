@@ -25,7 +25,7 @@ currentTime = datetime.now().strftime("%Y%m%d")
 # --- 설정값 ---
 N_CONTOUR_POINTS = 10 # 윤곽선 포인트 개수 (제어점 아님)
 
-OUTPUT_DIR = "20251125/CTRL10" # 출력 디렉토리 이름 변경
+OUTPUT_DIR = f"20260106/CTRL{N_CONTOUR_POINTS}" # 출력 디렉토리 이름 변경
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
@@ -36,30 +36,46 @@ MASTER_CSV = os.path.join(
 
 
 # --- 이미지 및 윤곽선 처리 함수 ---
-# 1.이미지 이진 마스킹
-def load_binary_outline(image_path, thresh=0.8):
+# 1. 이미지 이진 마스킹 (수정됨)
+def load_binary_outline(image_path, thresh=0.5): # thresh 기준값을 0.5로 중앙값 설정
     import matplotlib.image as mpimg
-    try:
-        img = mpimg.imread(image_path) 
-    except Exception:
-        return None
+    img = mpimg.imread(image_path) 
 
+    # 색 이미지인 경우 흑백 변환
     if img.ndim == 3: 
+        # PNG의 경우 4번째 채널(Alpha)이 있을 수 있으므로 [:3]으로 RGB만 가져옴
         gray = img[..., :3].mean(axis=2) 
     else: 
         gray = img.astype(float)
 
+    # 흑백 사진 정규화 (0.0 ~ 1.0)
     gray = (gray - gray.min()) / (gray.max() - gray.min() + 1e-9)
 
-    mask = (gray < thresh).astype(np.uint8)
+    # --- 배경색 자동 감지 ---
+    # 이미지의 네 모서리 픽셀의 평균 밝기를 구합니다.
+    h, w = gray.shape
+    corners = [gray[0, 0], gray[0, w-1], gray[h-1, 0], gray[h-1, w-1]]
+    avg_corner_brightness = np.mean(corners)
+
+    if avg_corner_brightness > 0.5:
+        # 1) 배경이 밝은 경우 (흰 배경, 기존 로직)
+        # 어두운 부분(< 0.5)을 물체로 인식
+        mask = (gray < thresh).astype(np.uint8)
+    else:
+        # 2) 배경이 어두운 경우 (검은 배경, 이번 케이스)
+        # 밝은 부분(> 0.5)을 물체로 인식
+        mask = (gray > thresh).astype(np.uint8)
+    # ------------------------------------
     
     try:
         from scipy.ndimage import binary_dilation, binary_closing
-        mask = binary_closing(mask, iterations=1)
+        # 검은 배경일 때 노이즈가 더 잘 보일 수 있어 closing을 먼저 하여 구멍을 메움
+        mask = binary_closing(mask, iterations=2)
         mask = binary_dilation(mask, iterations=1)
-    except Exception: pass
+    except Exception: 
+        print("Scipy not found.")
 
-    return mask 
+    return mask
 
 
 # 2.윤곽선 추출 
@@ -86,9 +102,6 @@ def resample_polyline(points, n_samples):
     t = (u - cumulative_lengths[indices]) / (seg_lengths[indices] + 1e-9)
 
     return (1 - t)[:, None] * P[indices] + t[:, None] * P[indices + 1] 
-
-# --- B-스플라인 관련 함수는 제어점 저장을 위해 사용되지 않으므로 제거 ---
-# (DraggableCtrl, Navigator 등 GUI 클래스 및 B-스플라인 피팅 관련 함수는 윤곽선 포인트 저장에 필요 없으므로 제거했습니다.)
 
 # --- 유틸리티 함수 ---
 def bbox_minmax(points): 
@@ -191,10 +204,10 @@ def run_contour_dir_and_save(DIR_path, n_contour_points=200):
     """
     global TYPE_MAPPING
     # 파일 목록을 알파벳 순으로 가져옵니다.
-    all_files = sorted(glob.glob(os.path.join(DIR_path, "*.jpg"))) 
+    all_files = sorted(glob.glob(os.path.join(DIR_path, "*.png"))) 
 
     if not all_files:
-        print(f"[ERROR] No .jpg files found in: {DIR_path}")
+        print(f"[ERROR] No .png files found in: {DIR_path}")
         return
 
     # 1. Type Mapping 사전 구축 (알파벳 순으로 Type00, Type01...)
@@ -244,7 +257,7 @@ def run_contour_dir_and_save(DIR_path, n_contour_points=200):
 
 if __name__ == "__main__":
     
-    DIR_PATH = r"C:\Users\user\Documents\GitHub\Shoe_PBL_Project\SHOE_LJH\output_outlines_1030\L" # <- 여기에 대상 디렉토리 경로 입력
+    DIR_PATH = r"C:\Users\user\Documents\GitHub\Shoe_PBL_Project\SHOE_LJH\new\L" # <- 여기에 대상 디렉토리 경로 입력
     
     # N_CONTOUR_POINTS는 위에서 200으로 설정됨
     # N_CTRL_POINTS는 더 이상 사용되지 않음

@@ -87,7 +87,7 @@ def get_perspective_transformed_image(img):
             black_mask = cv2.morphologyEx(black_mask, cv2.MORPH_CLOSE, kernel)
             black_mask = cv2.morphologyEx(black_mask, cv2.MORPH_OPEN, kernel)
             
-            # ★★★ [추가] 마스크 외곽을 약간 확장하여 4각형 검출에 도움 ★★★
+            # 마스크 외곽을 약간 확장하여 4각형 검출에 도움
             black_mask = cv2.dilate(black_mask, np.ones((5,5),np.uint8), iterations=1) 
             
             contours, _ = cv2.findContours(black_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -251,11 +251,11 @@ def get_smoothed_contour(mask):
 # SECTION 3: 메인 처리 함수
 # ==============================================================================
 
-# ★★★ 변경점 1: 함수 시그니처 변경 ★★★
+# 함수 시그니처 변경
 # output_folder 대신 최종 저장 경로인 output_path를 받도록 수정
 def process_image(input_path, output_path):
-    # file_name = os.path.basename(input_path) # <-- 이 로직은 main으로 이동
-    # output_path = os.path.join(output_folder, f"outline_{file_name}") # <-- 불필요
+    # file_name = os.path.basename(input_path)
+    # output_path = os.path.join(output_folder, f"outline_{file_name}")
 
     # ================================
     # STEP 1. 이미지 불러오기 및 전처리
@@ -274,12 +274,12 @@ def process_image(input_path, output_path):
         return
 
     # ================================
-    # STEP 3. K-MEANS 기반 객체 마스크 추출 (★새로운 로직★)
+    # STEP 3. K-MEANS 기반 객체 마스크 추출
     # ================================
     obj_mask, segmented_image = get_object_mask_with_kmeans(warped)
     
     # ================================
-    # STEP 4. 외곽선 스무딩 (★새로운 로직★)
+    # STEP 4. 외곽선 스무딩
     # ================================
     result = get_smoothed_contour(obj_mask)
     if result is None:
@@ -288,7 +288,7 @@ def process_image(input_path, output_path):
     analysis_contour, filled_mask, smoothed_mask = result
     
     # ================================
-    # STEP 5. 최종 윤곽선 각도 보정 및 저장 (★기존 로직 유지★)
+    # STEP 5. 최종 윤곽선 각도 보정 및 저장
     # ================================
     h_warped, w_warped = warped.shape[:2]
     final_output_image = None
@@ -347,7 +347,7 @@ def process_image(input_path, output_path):
         else:
             final_output_image = rotated_canvas
         
-        # ★★★ 변경점 2: 인자로 받은 output_path를 그대로 사용 ★★★
+        # 인자로 받은 output_path를 그대로 사용
         cv2.imwrite(output_path, final_output_image)
         print(f"'{output_path}' 파일에 회전 보정된 윤곽선 이미지를 저장했습니다.")
     else:
@@ -360,19 +360,8 @@ def process_image(input_path, output_path):
     if analysis_contour is not None:
         cv2.drawContours(warped_with_contour, [analysis_contour], -1, (0, 0, 255), 10)
 
-    # 시각화 코드는 용도에 맞게 활성화/비활성화 하세요 (주석 처리)
-    # cv2.imshow("Warped Image with Final Contour", resize_for_display(warped_with_contour, 800))
-    # cv2.imshow("K-Means Segments", resize_for_display(segmented_image, 800))
-    # cv2.imshow("Object Mask (Initial)", resize_for_display(obj_mask, 800))
-    # cv2.imshow("Object Mask (Filled)", resize_for_display(filled_mask, 800))
-    # cv2.imshow("Object Mask (Smoothed)", resize_for_display(smoothed_mask, 800))
-    # cv2.imshow("Final Cropped Outline", resize_for_display(final_output_image, 800))
-    
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
 
-
-# ★★★ 변경점 3: main 블록 전체 수정 ★★★
+# main 블록 전체 수정
 if __name__ == '__main__':
     base_input_folder = "ShoeAllData"  # 기본 입력 폴더 (e.g., /shoose_data)
     base_output_folder = "output_outlines_1030" # 기본 출력 폴더

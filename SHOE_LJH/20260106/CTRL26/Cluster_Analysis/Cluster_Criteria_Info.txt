@@ -1,0 +1,14 @@
+========================================================
+           SHOE TYPE CLUSTERING CRITERIA
+========================================================
+
+1. Cut Mode used       : Fixed Count (4)
+2. Total Groups Created: 4
+
+3. Distance Metric:
+   - Metric: RMSE between Min-Size Shapes (Cyclic Aligned)
+   - Linkage: Ward Method
+
+4. Note:
+   - If 'Fixed Count' mode was used, the algorithm automatically adjusted
+     the threshold to result in exactly the requested number of groups.

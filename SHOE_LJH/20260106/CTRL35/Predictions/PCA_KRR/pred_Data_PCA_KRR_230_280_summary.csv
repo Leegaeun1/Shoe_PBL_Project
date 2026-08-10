@@ -1,0 +1,9 @@
+Type,Matched_With
+Type00,Self-Fallback (RMSE: 3.33 > 2.5)
+Type01,Self-Fallback (RMSE: 2.90 > 2.5)
+Type02,Self-Fallback (RMSE: 4.14 > 2.5)
+Type03,"Individual Match (Type06, RMSE: 1.2473)"
+Type04,Self-Fallback (RMSE: 3.09 > 2.5)
+Type05,Self-Fallback (RMSE: 3.72 > 2.5)
+Type06,"Individual Match (Type03, RMSE: 1.2473)"
+Type07,Self-Fallback (RMSE: 3.81 > 2.5)

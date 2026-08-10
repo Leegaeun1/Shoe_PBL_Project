@@ -1,0 +1,5 @@
+Cut Mode: Fixed Count (4)
+Effective Cut Threshold (Distance): 5.282875
+------------------------------
+Note: If 'Ward_Distance' in Linkage Matrix > Threshold, those clusters are merged.
+To get N clusters, the tree is cut at this distance height.

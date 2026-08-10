@@ -49,7 +49,7 @@ def to_heel_up_frame(P, v1=None, v2=None, y0_shift=None):
     return Pp
 
 # =========================================================
-# [2] 이미지 생성 함수 (투명 배경 수정)
+# [2] 이미지 생성 함수
 # =========================================================
 def generate_aligned_shoe_image(csv_path, target_type, target_size, ModelName, ColorType, output_dir="output_images"):
     # 1. 데이터 로드
@@ -58,7 +58,7 @@ def generate_aligned_shoe_image(csv_path, target_type, target_size, ModelName, C
         return
     df = pd.read_csv(csv_path)
 
-
+    df.columns = df.columns.str.strip()
 
     # 2. 데이터 필터링
     filtered_df = df[(df['Type'] == target_type) & (df['size'] == target_size)]
@@ -106,24 +106,22 @@ def generate_aligned_shoe_image(csv_path, target_type, target_size, ModelName, C
     }
 
 
-    color, edgecolor, alpha = COLOR_MAP.get(ColorType, COLOR_MAP[0])
+    color, edgecolor, alpha = COLOR_MAP.get(ColorType, COLOR_MAP[7])
 
     plt.fill(aligned_curve[:, 0], aligned_curve[:, 1], 
              color=color, alpha=alpha, edgecolor=edgecolor # >>>>>>>>> 색 바꾸기
-             , linewidth=2)  
+             , linewidth=2,linestyle='-')  
     
-
-
-
-
-    # [수정된 부분] 축과 그리드 제거
+    # 축과 그리드 제거
     plt.axis('equal') # 비율 유지
+    plt.xlim(-70, 70)   # 좌우 폭: -70 ~ 70 (총 140)
+    plt.ylim(-20, 320)  # 상하 길이: -20 ~ 320 (총 340)
     plt.axis('off')   # 축, 눈금, 테두리 모두 제거
     
     save_name = f"{target_type}_{target_size}_{ModelName}_aligned_transparent.png"
     save_path = os.path.join(output_dir, save_name)
     
-    # [수정된 부분] transparent=True 옵션 추가
+    # transparent=True 옵션 추가
     plt.savefig(save_path, dpi=150, bbox_inches='tight', transparent=True)
     plt.close()
     
@@ -135,19 +133,19 @@ def generate_aligned_shoe_image(csv_path, target_type, target_size, ModelName, C
 if __name__ == "__main__":
     # 파일 경로 수정하세요
 
-    state = "20251126" # 20251125 20251126   왼쪽 오른쪽
+    state = "20260211" # 20251125 20251126   왼쪽 오른쪽
 
-    CTRLPoint = "CTRL70"
-    ModelName = "PCA_LINEAR" # PCA_GPR PCA_KRR PCA_LINEAR PCA_SVR PURE_GPR PURE_KRR PURE_SVR
-    CSV_FILE = rf"C:\Users\ljhyu\OneDrive\Desktop\Shoe_Project\신발정리한거\{state}\{CTRLPoint}\Predictions\{ModelName}\pred_Data_{ModelName}_230_280.csv" 
+    CTRLPoint = "CTRL40"
+    ModelName = "PURE_SVR" # PCA_GPR PCA_KRR PCA_LINEAR PCA_SVR PURE_GPR PURE_KRR PURE_SVR RATIO_CTRL
+    CSV_FILE = rf"C:\Users\user\Documents\GitHub\Shoe_PBL_Project\SHOE_LJH\{state}\{CTRLPoint}\Predictions\{ModelName}\pred_Data_{ModelName}_230_280.csv" 
     
 
     # ModelName = "Ori"
-    # CSV_FILE = rf"C:\Users\ljhyu\OneDrive\Desktop\Shoe_Project\신발정리한거\{state}\{CTRLPoint}\control_points_master_R_20251126.csv" 
+    # CSV_FILE = rf"C:\Users\user\Documents\GitHub\Shoe_PBL_Project\SHOE_LJH\{state}\{CTRLPoint}\control_points_master_L_20260106.csv" 
     
     
     ColorType = 9
-    TARGET_TYPE = "Type00"
-    TARGET_SIZE = 250
+    TARGET_TYPE = "Type05" # 1 2 4 7
+    TARGET_SIZE = 240 # 240 260 280
     
     generate_aligned_shoe_image(CSV_FILE, TARGET_TYPE, TARGET_SIZE,ModelName, ColorType)

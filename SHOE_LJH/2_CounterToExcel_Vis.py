@@ -38,7 +38,7 @@ MASTER_CSV = os.path.join(
 def save_plot(filepath, title, data_plots, align_to_heel=False):
     """
     여러 좌표 데이터셋을 하나의 플롯으로 그려 PNG 파일로 저장합니다.
-    [수정됨] align_to_heel=True이면 뒤꿈치를 y=0에 정렬하고 범례를 우측으로 이동.
+    align_to_heel=True이면 뒤꿈치를 y=0에 정렬하고 범례를 우측으로 이동.
     """
     try:
         fig, ax = plt.subplots(figsize=(8, 10))
@@ -46,7 +46,7 @@ def save_plot(filepath, title, data_plots, align_to_heel=False):
         all_data_for_bounds = []
         v1, v2, y0_shift = None, None, None # Alignment params
 
-        # --- [NEW] Alignment Logic ---
+        # --- Alignment Logic ---
         if align_to_heel and data_plots:
             # 첫 번째 유효한 데이터를 기준으로 정렬 축 계산
             ref_data = None
@@ -110,7 +110,7 @@ def save_plot(filepath, title, data_plots, align_to_heel=False):
         # --- [MODIFIED] Legend(Caption) Location ---
         if any(item.get('label') and not item['label'].startswith('_') for item in data_plots):
             if align_to_heel:
-                # ★★★ 범례를 "오른쪽 중앙"으로 이동 ★★★
+                # 범례를 "오른쪽 중앙"으로 이동
                 ax.legend(loc='center right') 
             else:
                 ax.legend(loc="best")
@@ -183,10 +183,10 @@ def load_binary_outline(image_path, thresh=0.8):
     gray = (gray - gray.min()) / (gray.max() - gray.min() + 1e-9)
 
     # 흑백 사진에 대해서 이진 마스킹 진행 >> 그냥 흑/백 부분으로 나누는거 
-    #thresh는 0.8로 밝기가 0.8보다 어두우면 1로 나옴 ㅇㅇ
+    #thresh는 0.8로 밝기가 0.8보다 어두우면 1로 나옴
     mask = (gray < thresh).astype(np.uint8)
     
-    try:# 마스크를 좀 더 다듬는 구간 (너무 삐뚤빼뚤해서 그럼) 생각 ㄴㄴ
+    try:# 마스크를 좀 더 다듬는 구간
         from scipy.ndimage import binary_dilation, binary_closing
         mask = binary_closing(mask, iterations=1)
         mask = binary_dilation(mask, iterations=1)
@@ -201,27 +201,27 @@ def largest_contour(mask):
     # 앞에서 마스킹 한거 ㅇㅇ 그거가지고 윤곽선 추출 level은 강도임 
     contours = measure.find_contours(mask, level=0.5)
     if not contours: raise RuntimeError("No contour found.")
-    return np.fliplr(max(contours, key=len))  # >> 가장 큰 외곽선 선택   >> 그리고 나서 좌우 반전함 --------  contour 좌표는 (row, col) = (y, x) 순서라서 우리가 아는 x/y좌표에 너으려면 그래야한뎅
+    return np.fliplr(max(contours, key=len))  # >> 가장 큰 외곽선 선택   >> 그리고 나서 좌우 반전함
 
 # 3.윤곽선을 다각형으로 만듬
 def resample_polyline(points, n_samples):# points - 윤곽선 전체를 n_samples개의 점으로 다각형을 그림!
-    P = np.vstack([points, points[0]]) ## 시작점과 끝점을 일단 연결함 >> 끊어져있을수도 있으니께
+    P = np.vstack([points, points[0]]) ## 시작점과 끝점을 일단 연결함
 
     seg_lengths = np.linalg.norm(np.diff(P, axis=0), axis=1) # 전체 변의 길이 배열.    
     # np.diff(P, axis=0) >> 이게 각 점의 벡터차이
     # np.linalg.norm >> 벡터의 norm을 구함  >> 거리임
     # cumulative_lengths = np.hstack([[0], np.cumsum(seg_lengths)])
     cumulative_lengths = np.hstack(np.cumsum(seg_lengths)) # 각 선분 길이를 누적합해서 경로를 따라 진행한 거리 누적.  >> 1,1+2, 1+2+3 ... 이렇게 되어있고, 
-    total_length = cumulative_lengths[-1] ## 그럼 젤 끝에건 전체 폐곡선의 길이, 폐곡선이란... 한 곡선상에서 한 점이 한 방향으로 움직여, 출발점으로 되돌아오는 곡선.이라네여
+    total_length = cumulative_lengths[-1] ## 그럼 젤 끝에건 전체 폐곡선의 길이, 폐곡선이란... 한 곡선상에서 한 점이 한 방향으로 움직여, 출발점으로 되돌아오는 곡선
 
-    u = np.linspace(0, total_length, n_samples, endpoint=False) # 전체 구간에서 균등 간격의 n_samples 생성  >> 일정한 거리간격으로 생성하는거징
+    u = np.linspace(0, total_length, n_samples, endpoint=False) # 전체 구간에서 균등 간격의 n_samples 생성
 
     # 각 샘플 u가 어느 선분 구간에 속하는지 찾아서 그 인덱스를 반환
     indices = np.searchsorted(cumulative_lengths, u, side="right") - 1
     indices = np.clip(indices, 0, len(P) - 2) # 배열 범위 조정 
 
 
-    # t는 각 샘플이 속한 선분에서의 상대 위치 (0~1).  >> 이건....모르겠당
+    # t는 각 샘플이 속한 선분에서의 상대 위치 (0~1).
     t = (u - cumulative_lengths[indices]) / (seg_lengths[indices] + 1e-9)
 
     return (1 - t)[:, None] * P[indices] + t[:, None] * P[indices + 1] # 선분의 양 끝점을 선형 보간.
@@ -265,7 +265,7 @@ def open_uniform_knot_vector(n_ctrl, degree):
 
     return knots / np.max(knots) # 0과 1 사이로 정규화
 
-# Cox-de Boor 재귀 공식을 사용한 B-스플라인 기저 함수 계산   >> 이건 정해져있는 방정식같은거임!
+# Cox-de Boor 재귀 공식을 사용한 B-스플라인 기저 함수 계산
 def bspline_basis(i, degree, knots, t):
    # 기저함수란?
    # B-스플라인 곡선은 제어점(control points)과 기저 함수(basis functions) 의 선형 결합으로 표현됨
@@ -339,7 +339,7 @@ def fit_open_bspline_least_squares(points, n_ctrl=20, degree=3, lam=1e-5):
         D = np.eye(n_ctrl, k=0) * -2 + np.eye(n_ctrl, k=1) * 1 + np.eye(n_ctrl, k=-1) * 1
         
         # 
-        D = D[1:-1] #  곡선 시작·끝을 강제로 지나야 하므로, 양 끝점은 제외해서 조정 X
+        D = D[1:-1] #  곡선 시작, 끝을 강제로 지나야 하므로, 양 끝점은 제외해서 조정 X
 
         # >> 보통 최소자승 정규방정식  lam이 클수록 더 매끈한 곡선이 됨 
         ATA = A.T @ A + lam * (D.T @ D) # @ => 행렬 곱 연산자
@@ -458,13 +458,6 @@ class DraggableCtrl:
             self.save_current()
         # 방향키는 Navigator가 관리하므로 여기서는 패스
 
-    # def on_close(self, event):
-    #     # 창 닫을 때 자동 저장
-    #     try:
-    #         self.save_current()
-    #     except Exception as e:
-    #         print(f"[WARN] auto-save failed: {e}")
-
     def save_current(self):
         tkey = parse_type_from_filename(self.image_path, default="unknown")
         tlabel = get_or_assign_type_label(tkey)
@@ -564,7 +557,7 @@ def _ensure_master_header(path, n_ctrl, sep=", "):
     """마스터 CSV에 헤더가 없으면 생성: type,size,side,x1,y1,...,xN,yN"""
     if os.path.exists(path) and os.path.getsize(path) > 0:
         return
-    cols = ["type", "side", "size", ]  # ← type을 맨 앞에 추가
+    cols = ["type", "side", "size", ] 
     for i in range(1, n_ctrl + 1):
         cols += [f"x{i}", f"y{i}"]
     header = sep.join(cols)
@@ -605,7 +598,7 @@ def save_ctrl_to_master(image_path, ctrl_points, master_csv=MASTER_CSV, sep=", "
     print(f"[APPEND] -> {master_csv}  (type='{type_label}', size≈{size_mm:.0f}, side='{side}', {n_ctrl} ctrl pts)")
 
 
-# --- MODIFIED: 메인 실행 함수 ---
+# --- 메인 실행 함수 ---
 def run_open_fit(image_path, n_contour_points=200, n_ctrl_points=25):
     print("1. Loading image and extracting contour...")
     mask = load_binary_outline(image_path) # 이진 마스킹
@@ -615,19 +608,19 @@ def run_open_fit(image_path, n_contour_points=200, n_ctrl_points=25):
     contour_resampled = resample_polyline(contour, n_contour_points) # 윤곽선 전체를 n_samples개의 점으로 만들수 있는 다각형을 그림!
 
     print("3. Re-ordering contour data to start and end at the toe...")
-    # --- 데이터 재구성 (핵심) ---
+    # --- 데이터 재구성 ---
     # 발가락 끝점(y값이 가장 큰 점)의 인덱스를 찾음 
     toe_index = np.argmax(contour_resampled[:, 1])
     # np.argmax >> rkwkd zms dnjsthdml dlseprtm qksghks
     # [:,0] → x좌표 (좌우 방향)
     # [:,1] → y좌표 (상하 방향)
 
-    # 발가락 끝점이 배열의 시작이 되도록 데이터를 회전시킴    >> 동작은 다음과 같이 -- [shift = toe_index → 배열을 앞으로 toe_index만큼 밀어줌.]
+    # 발가락 끝점이 배열의 시작이 되도록 데이터를 회전시킴
     contour_rolled = np.roll(contour_resampled, toe_index, axis=0)
     # 시작점을 마지막에 추가하여 데이터를 [toe, ..., toe] 형태로 만듦  >> 완전히 닫기!
     contour_path = np.vstack([contour_rolled, contour_rolled[0]])
 
-    # ★ 추가: 파일명에서 사이즈(mm) 읽어서 mm 스케일로 변환
+    # 파일명에서 사이즈(mm) 읽어서 mm 스케일로 변환
     size_mm = parse_size_mm_from_filename(image_path, fallback=250.0)
     contour_mm = scale_to_mm(contour_path, height_mm=size_mm, ref_axis="y")
 
@@ -649,8 +642,7 @@ def run_open_fit(image_path, n_contour_points=200, n_ctrl_points=25):
 
 def run_open_fit_DIR(DIR_path, n_contour_points=200, n_ctrl_points=25, degree=3):
     """
-    ... (함수 설명 동일) ...
-    ★[수정]★ Control Polygon(파란 점선)을 닫힌 루프로 저장
+    Control Polygon(파란 점선)을 닫힌 루프로 저장
     """
     
     # --- 디버그 출력 디렉토리 생성 ---
@@ -723,7 +715,7 @@ def run_open_fit_DIR(DIR_path, n_contour_points=200, n_ctrl_points=25, degree=3)
             final_curve_raw = bspline_curve(ctrl, degree, knots, t_values)
             final_curve = np.vstack([final_curve_raw, final_curve_raw[0]])
             
-            # ★★★ [수정] 컨트롤 폴리곤(파란 점선)도 닫힌 루프로 생성 ★★★
+            # 컨트롤 폴리곤(파란 점선)도 닫힌 루프로 생성
             ctrl_closed = np.vstack([ctrl, ctrl[0]])
             
             save_path_bspline = os.path.join(dir_4_bspline, filename_base + ".png")
@@ -737,7 +729,7 @@ def run_open_fit_DIR(DIR_path, n_contour_points=200, n_ctrl_points=25, degree=3)
                       ],
                       align_to_heel=True) 
             
-            # --- 7. (기존) CSV 저장 및 GUI용 데이터 추가 ---
+            # --- 7. CSV 저장 및 GUI용 데이터 추가 ---
             save_ctrl_to_master(img, ctrl)
             entries.append({"image_path": img, "contour_mm": contour_mm, "ctrl": ctrl})
             
@@ -798,7 +790,7 @@ def parse_side_from_filename(path, default=""):
 
 
 if __name__ == "__main__":
-    # --- MODIFIED: '열린' B-스플라인을 위한 Interactive Editor ---
+    # --- '열린' B-스플라인을 위한 Interactive Editor ---
     DEGREE = 3
     PICK_RADIUS_PX = 12
 
@@ -821,4 +813,4 @@ if __name__ == "__main__":
     run_open_fit_DIR(DIR_path = DIR_PATH, 
                      n_contour_points=N_CONTOUR_POINTS, 
                      n_ctrl_points=N_CTRL_POINTS,
-                     degree=DEGREE) # ★★★ DEGREE 값 전달 ★★★
+                     degree=DEGREE) # DEGREE 값 전달

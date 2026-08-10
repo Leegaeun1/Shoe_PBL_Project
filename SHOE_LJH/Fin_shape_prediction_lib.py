@@ -222,7 +222,7 @@ class ShapePredictorEnv:
         
         if "GPR" in model_name:
             kernel = C(1.0)*RBF(70.0) + WhiteKernel(1e-3) + C(1.0)*DotProduct()
-            model = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=50, random_state=0, normalize_y=True)
+            return GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=5, random_state=0)
             
         elif "SVR" in model_name:
             gamma = 1.0 / (2.0 * (20.0**2) + 1e-12)

@@ -9,9 +9,9 @@ from scipy.optimize import linear_sum_assignment
 # =========================================================
 # [1] 전역 설정
 # =========================================================
-BASE_ROOT = "20251125"
+BASE_ROOT = "20260106"
 TARGET_CTRL_DIRS = [f"CTRL{i}" for i in range(10, 80, 10)] # CTRL10 ~ CTRL70
-MASTER_FILENAME = "control_points_master_L_20251124.csv"
+MASTER_FILENAME = "control_points_master_L_20260106.csv"
 
 # 시각화 및 B-Spline 설정
 USE_BSPLINE = True
@@ -20,21 +20,21 @@ SAMPLES = 1500
 CLOSED = False
 SAVE_PLOTS = True  # 그래프 이미지 저장 여부
 
-# 평가 지표 목록 (CSV 헤더용) - [수정] Size_Error 추가됨
+# 평가 지표 목록 (CSV 헤더용)
 CSV_METRICS = [
     "RMSE", "MAE", "Hausdorff_max", "Chamfer_mean", 
     "Length_Error", "Width_Error", "Size_Error", "Area_Error", 
     "IoU", "Dice", "EMD"
 ]
 
-# 시각화 스타일 (자동 할당용) - [수정] 요청하신 스타일 적용
+# 시각화 스타일 (자동 할당용)
 STYLE_RULES = {
     # 기준선
     "Ref":      {"color": "black",     "ls": "-",   "lw": 2.5},
     "RATIO_CTRL": {"color": "magenta", "ls": "-.",  "lw": 2.0},      # 마젠타
 
     # 복합 모델
-    "PCA_GPR":  {"color": "darkgreen", "ls": ":",   "lw": 1.5},      # 짙은 초록
+    #"PCA_GPR":  {"color": "darkgreen", "ls": ":",   "lw": 1.5},      # 짙은 초록
     "PCA_KRR":  {"color": "cyan",      "ls": ":",   "lw": 1.5},      # 청록색
     "PCA_SVR":  {"color": "brown",     "ls": ":",   "lw": 1.5},      # 갈색
 
@@ -169,7 +169,7 @@ def get_metrics(C_ref, C_pred):
     w_pred = C_pred[:,0].max() - C_pred[:,0].min()
     w_err = np.abs(w_ref - w_pred)
     
-    # [추가] 4. Size Error (Y-axis range)
+    # 4. Size Error (Y-axis range)
     s_ref = C_ref[:,1].max() - C_ref[:,1].min()
     s_pred = C_pred[:,1].max() - C_pred[:,1].min()
     size_err = np.abs(s_ref - s_pred)

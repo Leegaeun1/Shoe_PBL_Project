@@ -7,9 +7,9 @@ import csv
 # -----------------------
 # 전역 설정
 # -----------------------
-DIR_NAME = "20251125/CTRL60"
+DIR_NAME = "20260106/CTRL70"
 
-file_name = f"{DIR_NAME}/control_points_master_L_20251124.csv"
+file_name = f"{DIR_NAME}/control_points_master_L_20260106.csv"
 output_file = f"{DIR_NAME}/Predictions/RATIO_CTRL/pred_Data_RATIO_CTRL_230_280.csv"
 
 # 실행 시간 요약 저장 경로
@@ -21,7 +21,6 @@ def scale_master_csv_by_type_min(input_path, output_path, target_sizes):
     """
     각 type별 최소 사이즈의 행을 찾아, 해당 행의 control point를
     target_sizes에 따라 비율대로 스케일링하여 저장합니다.
-    (실행 시간 측정 기능 추가)
     """
     print(f"Loading Master Data from {input_path}...")
     
@@ -61,7 +60,7 @@ def scale_master_csv_by_type_min(input_path, output_path, target_sizes):
         base_size = base_row['size']
         base_coords = base_row[coord_cols].values
         
-        # ★ 타이머 시작
+        # 타이머 시작
         start_t = time.perf_counter()
 
         # 타겟 사이즈별 스케일링 수행
@@ -85,13 +84,13 @@ def scale_master_csv_by_type_min(input_path, output_path, target_sizes):
 
             new_rows.append(new_row)
         
-        # ★ 타이머 종료
+        # 타이머 종료
         end_t = time.perf_counter()
         elapsed = end_t - start_t
         
         print(f"  [DONE] Type: '{base_type}' (Base: {base_size}), Time: {elapsed:.5f}s")
 
-        # ★ 통계 저장
+        # 통계 저장
         runtime_stats.append({
             "Type": base_type,
             "Base_Size": base_size,
@@ -112,7 +111,7 @@ def scale_master_csv_by_type_min(input_path, output_path, target_sizes):
     print(f"\n[SUCCESS] Scaled CSV saved to -> {output_path}")
     print(f"Total rows saved: {len(scaled_df)}")
 
-    # 7. Save Runtime Summary CSV (★ 추가된 기능)
+    # 7. Save Runtime Summary CSV
     if runtime_stats:
         os.makedirs(os.path.dirname(summary_output_file), exist_ok=True)
         fieldnames = ["Type", "Base_Size", "Matched_Type", "Time_sec", "Points"]
