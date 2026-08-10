@@ -151,7 +151,13 @@ venv.bak/
 20260106/CTRL3[0-9]/debug_outputs/
 20260106/CTRL4[0-9]/debug_outputs/
 20260106/CTRL50/debug_outputs/
-
+2_CounterToExcel_Vis.py
+4_main_controller.py
+4_ratio_point.py
+5_aggregate_results.py
+5_Result_Visual_V8_All.py
+Fin_shape_prediction_lib_2026.py
+Fin_shape_prediction_lib.py
 trash
 20260211
 output_images
